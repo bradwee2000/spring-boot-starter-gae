@@ -23,7 +23,7 @@ public class AuthAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean(Algorithm.class)
-  public Algorithm algorithm(@Value("${jwt.secret.key:secret}") final String secretKey) {
+  public Algorithm algorithm(@Value("${bwee.jwt.secret.key:secret}") final String secretKey) {
     return Algorithm.HMAC256(secretKey);
   }
 

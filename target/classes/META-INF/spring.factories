@@ -1,0 +1,6 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.bwee.springboot.gae.sdk.auth.AuthConfiguration,\
+  com.bwee.springboot.gae.sdk.image.ImageConfiguration,\
+  com.bwee.springboot.gae.sdk.pubsub.PubSubConfiguration,\
+  com.bwee.springboot.gae.sdk.storage.StorageConfiguration,\
+  com.bwee.springboot.gae.sdk.task.TaskConfiguration

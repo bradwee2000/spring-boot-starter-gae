@@ -28,7 +28,7 @@ public class PublishEventHandler {
     this.publisher = publisher;
   }
 
-  @AfterReturning(value = "@annotation(com.podello.sdk.event.PublishEvent)", returning = "result")
+  @AfterReturning(value = "@annotation(com.bwee.springboot.gae.event.PublishEvent)", returning = "result")
   public void publishEvent(final JoinPoint joinPoint, final Object result) {
     final PublishEvent event = extractEvent(joinPoint);
     final String topicName = event.value();

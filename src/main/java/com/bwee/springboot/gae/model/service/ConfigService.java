@@ -5,8 +5,6 @@ import com.bwee.springboot.gae.model.pojo.Config;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -15,14 +13,12 @@ import java.util.Optional;
 /**
  * @author bradwee2000@gmail.com
  */
-@Service
 public class ConfigService {
   private static final Logger LOG = LoggerFactory.getLogger(ConfigService.class);
 
   private final ConfigDao configDao;
   private final Gson gson;
 
-  @Autowired
   public ConfigService(final ConfigDao configDao, final Gson gson) {
     this.configDao = configDao;
     this.gson = gson;

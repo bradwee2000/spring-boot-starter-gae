@@ -4,6 +4,7 @@ import com.bwee.springboot.gae.pubsub.PubSubAutoConfiguration;
 import com.bwee.springboot.gae.pubsub.PubSubPublisher;
 import com.bwee.springboot.gae.task.TaskAutoConfiguration;
 import com.bwee.springboot.gae.task.TaskFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +23,9 @@ public class EventAutoConfiguration {
   }
 
   @Bean
-  public PushToTaskRouterController pushToTaskRouterController(final TaskFactory taskFactory) {
-    return new PushToTaskRouterController(taskFactory);
+  public PushToTaskRouterController pushToTaskRouterController(
+      final TaskFactory taskFactory,
+      @Value("${bwee.push.task.router.url.prefix:/tasks/}") final String urlPrefix) {
+    return new PushToTaskRouterController(taskFactory, urlPrefix);
   }
 }

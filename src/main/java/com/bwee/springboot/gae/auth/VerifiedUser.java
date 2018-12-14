@@ -2,7 +2,9 @@ package com.bwee.springboot.gae.auth;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -10,10 +12,18 @@ import java.util.List;
  */
 public class VerifiedUser {
 
+  public static VerifiedUser withId(final String id) {
+    return new VerifiedUser(id);
+  }
+
   private final String id;
   private final String firstname;
   private final String lastname;
   private final List<String> roles;
+
+  public VerifiedUser(final String id) {
+    this(id, null, null, Collections.emptyList());
+  }
 
   public VerifiedUser(String id, String firstname, String lastname, List<String> roles) {
     this.id = id;
@@ -34,8 +44,20 @@ public class VerifiedUser {
     return lastname;
   }
 
+  public VerifiedUser name(final String firstname, final String lastname) {
+    return new VerifiedUser(id, firstname, lastname, roles);
+  }
+
   public List<String> getRoles() {
     return roles;
+  }
+
+  public VerifiedUser roles(final List<String> roles) {
+    return new VerifiedUser(id, firstname, lastname, roles);
+  }
+
+  public VerifiedUser roles(final String role, final String ... more) {
+    return roles(Lists.asList(role, more));
   }
 
   @Override
@@ -58,8 +80,7 @@ public class VerifiedUser {
   public String toString() {
     return MoreObjects.toStringHelper(this)
             .add("id", id)
-            .add("firstname", firstname)
-            .add("lastname", lastname)
+            .add("name", firstname + " " + lastname)
             .add("roles", roles)
             .toString();
   }

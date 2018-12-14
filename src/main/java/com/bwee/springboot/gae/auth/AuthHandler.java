@@ -1,9 +1,11 @@
 package com.bwee.springboot.gae.auth;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,10 @@ public class AuthHandler {
     this.tokenVerifier = tokenVerifier;
   }
 
-  @Before(value = "@annotation(com.bwee.springboot.gae.auth.Secured)")
+  @Pointcut("@within(com.bwee.springboot.gae.auth.Secured) || @annotation(Secured)")
+  public void method() {}
+
+  @Before("method()")
   public void verifyAuthorization(final JoinPoint joinPoint) {
     final Secured secured = extractAnnotation(joinPoint);
     final List<String> expectedRoles = Lists.newArrayList(secured.value());
@@ -41,14 +46,18 @@ public class AuthHandler {
 
     checkNotNull(request, "Can only be used in an Http request context.");
 
-    final String token = request.getHeader(AUTHORIZATION_HEADER);
+    final String token = StringUtils.replaceChars(request.getHeader(AUTHORIZATION_HEADER), "Bearer ", "");
+
+    if (StringUtils.isEmpty(token)) {
+      throw AuthorizationException.missingToken();
+    }
 
     // Must have valid token
-    final VerifiedUser user = (VerifiedUser) tokenVerifier.verifyToken(token);
+    final VerifiedUser user = tokenVerifier.verifyToken(token);
 
     // Must have all required roles
     if (!user.getRoles().containsAll(expectedRoles)) {
-      throw new AuthorizationException(user, expectedRoles);
+      throw AuthorizationException.missingRoles(user, expectedRoles);
     }
 
     request.setAttribute(AUTHORIZED_USER, user);

@@ -1,6 +1,8 @@
 package com.bwee.springboot.gae.auth;
 
 import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 /**
@@ -17,7 +19,14 @@ public class AuthTokenVerifier {
   }
 
   public VerifiedUser verifyToken(final String token) {
-    final DecodedJWT decodedJWT = jwtVerifier.verify(token);
-    return tokenTranslator.decode(decodedJWT);
+    try {
+      final DecodedJWT decodedJWT = jwtVerifier.verify(token);
+      return tokenTranslator.decode(decodedJWT);
+
+    } catch (final JWTDecodeException e) {
+      throw AuthorizationException.invalidToken(token);
+    } catch (final TokenExpiredException e) {
+      throw AuthorizationException.expiredToken(token);
+    }
   }
 }

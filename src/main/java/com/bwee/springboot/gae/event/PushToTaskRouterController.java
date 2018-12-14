@@ -21,10 +21,14 @@ import java.util.Base64;
 @RequestMapping("/push")
 public class PushToTaskRouterController {
   private static final Logger LOG = LoggerFactory.getLogger(PushToTaskRouterController.class);
-  private final TaskFactory taskFactory;
 
-  public PushToTaskRouterController(final TaskFactory taskFactory) {
+  private final TaskFactory taskFactory;
+  private final String urlPrefix;
+
+  public PushToTaskRouterController(final TaskFactory taskFactory,
+                                    final String urlPrefix) {
     this.taskFactory = taskFactory;
+    this.urlPrefix = urlPrefix;
   }
 
   @PostMapping("/{taskName}")
@@ -33,7 +37,7 @@ public class PushToTaskRouterController {
     final String data = pubSubMessage.getMessage().getData();
     final String json = new String(Base64.getDecoder().decode(data));
 
-    taskFactory.createWithUrl("/tasks/" + taskName)
+    taskFactory.createWithUrl(urlPrefix + taskName)
         .setMethod(TaskMethod.POST)
         .setQueueName(taskName)
         .setPayload(json)

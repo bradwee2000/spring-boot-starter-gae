@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * @author bradwee2000@gmail.com
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Secured {
 

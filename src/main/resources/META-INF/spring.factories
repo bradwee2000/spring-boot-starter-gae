@@ -2,6 +2,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.bwee.springboot.gae.auth.AuthAutoConfiguration,\
   com.bwee.springboot.gae.model.ConfigAutoConfiguration,\
   com.bwee.springboot.gae.image.ImageAutoConfiguration,\
+  com.bwee.springboot.gae.objectify.ObjectifyAutoConfiguration,\
   com.bwee.springboot.gae.pubsub.PubSubAutoConfiguration,\
   com.bwee.springboot.gae.storage.StorageAutoConfiguration,\
   com.bwee.springboot.gae.task.TaskAutoConfiguration

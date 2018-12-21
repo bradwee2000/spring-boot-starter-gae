@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.objectify;
 
+import com.bwee.springboot.gae.model.entity.ConfigEntity;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -39,7 +40,10 @@ public class ObjectifyFactoryFactory implements FactoryBean<ObjectifyFactory>, I
                                  final String basePackages) {
     this.applicationContext = applicationContext;
     this.memcacheService = memcacheService;
-    basePackageList = Lists.newArrayList(Splitter.on(',').trimResults().split(basePackages));
+    this.basePackageList = Splitter.on(',')
+        .trimResults()
+        .omitEmptyStrings()
+        .splitToList(basePackages + "," + ConfigEntity.class.getPackage().getName());
   }
 
   @Override

@@ -2,7 +2,9 @@ package com.bwee.springboot.gae.auth;
 
 import com.bwee.springboot.gae.auth.exception.AuthorizationException;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
+import com.bwee.springboot.gae.auth.user.AuthUserContext;
 import com.bwee.springboot.gae.auth.user.VerifiedUser;
+import com.google.appengine.api.users.UserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -80,6 +82,16 @@ public class AuthHandlerTest {
     }
 
     @Bean
+    public UserService userService() {
+      return mock(UserService.class);
+    }
+
+    @Bean
+    public AuthUserContext authUserContext() {
+      return mock(AuthUserContext.class);
+    }
+
+    @Bean
     public ClassSecuredController classSecuredController() {
       return new ClassSecuredController();
     }
@@ -90,8 +102,10 @@ public class AuthHandlerTest {
     }
 
     @Bean
-    public AuthHandler authHandler(final AuthTokenVerifier authTokenVerifier) {
-      return new AuthHandler(authTokenVerifier);
+    public AuthHandler authHandler(final AuthTokenVerifier authTokenVerifier,
+                                   final UserService userService,
+                                   final AuthUserContext authUserContext) {
+      return new AuthHandler(authTokenVerifier, userService, authUserContext);
     }
   }
 

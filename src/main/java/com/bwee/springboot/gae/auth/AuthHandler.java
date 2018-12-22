@@ -31,7 +31,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class AuthHandler {
   private static final Logger LOG = LoggerFactory.getLogger(AuthHandler.class);
   private static final String AUTHORIZATION_HEADER = "Authorization";
-  private static final String AUTHORIZED_USER = "AUTH_USER";
 
   private final AuthTokenVerifier tokenVerifier;
   private final UserService userService;

@@ -59,6 +59,16 @@ public class CustomTokenTranslator extends TokenTranslator<VerifiedUser> {
 #### Changing the secret key used in signing tokens
 Overwrite the property `bwee.jwt.secret.key`. Default key is set to "secret".
 
+#### Getting the authenticated user
+```java
+@Autowire
+private AuthUserContext context;
+
+private boolean isLoggedIn() {
+  return context.getAuthUser() != null;
+}
+```
+
 ## Event-Driven Processing
 Some processes can be triggered with events. For instance, when a new user is saved, a few things may happen:
 * a task can run to send an email verification.

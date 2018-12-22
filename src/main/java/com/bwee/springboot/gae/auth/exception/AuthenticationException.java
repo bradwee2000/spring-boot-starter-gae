@@ -1,4 +1,4 @@
-package com.bwee.springboot.gae.auth;
+package com.bwee.springboot.gae.auth.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

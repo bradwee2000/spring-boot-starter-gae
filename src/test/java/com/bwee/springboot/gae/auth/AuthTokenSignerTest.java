@@ -2,6 +2,9 @@ package com.bwee.springboot.gae.auth;
 
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.bwee.springboot.gae.auth.jwt.AuthTokenSigner;
+import com.bwee.springboot.gae.auth.jwt.TokenTranslator;
+import com.bwee.springboot.gae.auth.user.VerifiedUser;
 import org.junit.Before;
 import org.junit.Test;
 

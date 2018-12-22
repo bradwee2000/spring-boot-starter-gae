@@ -1,7 +1,8 @@
-package com.bwee.springboot.gae.auth;
+package com.bwee.springboot.gae.auth.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.bwee.springboot.gae.auth.user.VerifiedUser;
 
 /**
  * @author bradwee2000@gmail.com

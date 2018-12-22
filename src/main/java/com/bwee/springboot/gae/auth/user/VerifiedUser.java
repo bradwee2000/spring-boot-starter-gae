@@ -1,4 +1,4 @@
-package com.bwee.springboot.gae.auth;
+package com.bwee.springboot.gae.auth.user;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -42,6 +42,10 @@ public class VerifiedUser {
 
   public String getLastname() {
     return lastname;
+  }
+
+  public VerifiedUser name(final String firstname) {
+    return new VerifiedUser(id, firstname, null, roles);
   }
 
   public VerifiedUser name(final String firstname, final String lastname) {

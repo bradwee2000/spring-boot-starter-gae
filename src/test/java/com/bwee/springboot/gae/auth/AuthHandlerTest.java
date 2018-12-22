@@ -1,5 +1,8 @@
 package com.bwee.springboot.gae.auth;
 
+import com.bwee.springboot.gae.auth.exception.AuthorizationException;
+import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
+import com.bwee.springboot.gae.auth.user.VerifiedUser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;

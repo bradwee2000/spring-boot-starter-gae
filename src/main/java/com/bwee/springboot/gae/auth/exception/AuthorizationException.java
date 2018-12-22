@@ -1,5 +1,6 @@
-package com.bwee.springboot.gae.auth;
+package com.bwee.springboot.gae.auth.exception;
 
+import com.bwee.springboot.gae.auth.user.VerifiedUser;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -8,10 +9,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Collection;
 
-import static com.bwee.springboot.gae.auth.AuthorizationException.ErrorType.EXPIRED_TOKEN;
-import static com.bwee.springboot.gae.auth.AuthorizationException.ErrorType.INSUFFICIENT_RIGHTS;
-import static com.bwee.springboot.gae.auth.AuthorizationException.ErrorType.INVALID_TOKEN;
-import static com.bwee.springboot.gae.auth.AuthorizationException.ErrorType.MISSING_TOKEN;
+import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.EXPIRED_TOKEN;
+import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INSUFFICIENT_RIGHTS;
+import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INVALID_TOKEN;
+import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.MISSING_TOKEN;
 
 /**
  * @author bradwee2000@gmail.com

@@ -1,5 +1,11 @@
 package com.bwee.springboot.gae.auth;
 
+import com.bwee.springboot.gae.auth.exception.AuthorizationException;
+import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
+import com.bwee.springboot.gae.auth.user.AuthUserContext;
+import com.bwee.springboot.gae.auth.user.VerifiedUser;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
@@ -28,9 +34,15 @@ public class AuthHandler {
   private static final String AUTHORIZED_USER = "AUTH_USER";
 
   private final AuthTokenVerifier tokenVerifier;
+  private final UserService userService;
+  private final AuthUserContext authUserContext;
 
-  public AuthHandler(final AuthTokenVerifier tokenVerifier) {
+  public AuthHandler(final AuthTokenVerifier tokenVerifier,
+                     final UserService userService,
+                     final AuthUserContext authUserContext) {
     this.tokenVerifier = tokenVerifier;
+    this.userService = userService;
+    this.authUserContext = authUserContext;
   }
 
   @Pointcut("@within(com.bwee.springboot.gae.auth.Secured) || @annotation(Secured)")
@@ -38,6 +50,15 @@ public class AuthHandler {
 
   @Before("method()")
   public void verifyAuthorization(final JoinPoint joinPoint) {
+
+    // Allow GAE admins to proceed
+    if (userService.isUserLoggedIn() && userService.isUserAdmin()) {
+      final User user = userService.getCurrentUser();
+      final VerifiedUser verifiedUser = new VerifiedUser(user.getUserId()).name(user.getNickname());
+      authUserContext.setAuthUser(verifiedUser);
+      return;
+    }
+
     final Secured secured = extractAnnotation(joinPoint);
     final List<String> expectedRoles = Lists.newArrayList(secured.value());
 
@@ -60,7 +81,7 @@ public class AuthHandler {
       throw AuthorizationException.missingRoles(user, expectedRoles);
     }
 
-    request.setAttribute(AUTHORIZED_USER, user);
+    authUserContext.setAuthUser(user);
   }
 
   /**

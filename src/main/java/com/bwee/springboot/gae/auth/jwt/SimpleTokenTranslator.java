@@ -1,7 +1,8 @@
-package com.bwee.springboot.gae.auth;
+package com.bwee.springboot.gae.auth.jwt;
 
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.bwee.springboot.gae.auth.user.VerifiedUser;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -11,14 +12,14 @@ import java.util.List;
 /**
  * @author bradwee2000@gmail.com
  */
-public class BasicTokenTranslator extends TokenTranslator<VerifiedUser> {
+public class SimpleTokenTranslator extends TokenTranslator<VerifiedUser> {
   private static final String FIRSTNAME = "fn";
   private static final String LASTNAME = "ln";
   private static final String ROLES = "rl";
 
   private final Clock clock;
 
-  public BasicTokenTranslator(final Clock clock) {
+  public SimpleTokenTranslator(final Clock clock) {
     this.clock = clock;
   }
 

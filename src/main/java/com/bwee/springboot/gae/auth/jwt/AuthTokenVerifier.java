@@ -1,9 +1,11 @@
-package com.bwee.springboot.gae.auth;
+package com.bwee.springboot.gae.auth.jwt;
 
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.bwee.springboot.gae.auth.exception.AuthorizationException;
+import com.bwee.springboot.gae.auth.user.VerifiedUser;
 
 /**
  * @author bradwee2000@gmail.com

@@ -53,7 +53,7 @@ public class AuthHandler {
     // Allow GAE admins to proceed
     if (userService.isUserLoggedIn() && userService.isUserAdmin()) {
       final User user = userService.getCurrentUser();
-      final VerifiedUser verifiedUser = new VerifiedUser(user.getUserId()).name(user.getNickname());
+      final VerifiedUser verifiedUser = new VerifiedUser(user.getUserId()).name(user.getNickname()).roles("admin");
       authUserContext.setAuthUser(verifiedUser);
       return;
     }

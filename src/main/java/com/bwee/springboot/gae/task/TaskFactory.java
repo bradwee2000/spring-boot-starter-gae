@@ -70,6 +70,9 @@ public class TaskFactory {
       taskOptions.payload(task.getPayload());
     }
 
+    // Add other headers
+    task.getHeaders().entrySet().forEach(e -> taskOptions.header(e.getKey(), e.getValue()));
+
     // Add parameters
     task.getParams().forEach((key, value) -> taskOptions.param(key, value));
 

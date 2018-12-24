@@ -31,6 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class AuthHandler {
   private static final Logger LOG = LoggerFactory.getLogger(AuthHandler.class);
   private static final String AUTHORIZATION_HEADER = "Authorization";
+  private static final String TASK_NAME_HEADER = "X-AppEngine-TaskName";
 
   private final AuthTokenVerifier tokenVerifier;
   private final UserService userService;
@@ -50,21 +51,51 @@ public class AuthHandler {
   @Before("method()")
   public void verifyAuthorization(final JoinPoint joinPoint) {
 
+    // Allow GAE services to proceed
+    if (checkIsService()) {
+      return;
+    }
+
     // Allow GAE admins to proceed
+    if (checkIsAdmin()) {
+      return;
+    }
+
+    verifyAuthToken(joinPoint);
+  }
+
+  private boolean checkIsAdmin() {
     if (userService.isUserLoggedIn() && userService.isUserAdmin()) {
       final User user = userService.getCurrentUser();
       final VerifiedUser verifiedUser = new VerifiedUser(user.getUserId()).name(user.getNickname()).roles("admin");
       authUserContext.setAuthUser(verifiedUser);
-      return;
+      return true;
     }
+    return false;
+  }
 
-    final Secured secured = extractAnnotation(joinPoint);
-    final List<String> expectedRoles = Lists.newArrayList(secured.value());
-
+  private boolean checkIsService() {
     final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
         .currentRequestAttributes()).getRequest();
 
     checkNotNull(request, "Can only be used in an Http request context.");
+
+    if (!StringUtils.isEmpty(request.getHeader(TASK_NAME_HEADER))) {
+      final String taskName = request.getHeader(TASK_NAME_HEADER);
+      authUserContext.setAuthUser(new VerifiedUser(taskName).roles("task", "service"));
+      return true;
+    }
+    return false;
+  }
+
+  private void verifyAuthToken(final JoinPoint joinPoint) {
+    final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+        .currentRequestAttributes()).getRequest();
+
+    checkNotNull(request, "Can only be used in an Http request context.");
+
+    final Secured secured = extractAnnotation(joinPoint);
+    final List<String> expectedRoles = Lists.newArrayList(secured.value());
 
     final String token = StringUtils.replaceChars(request.getHeader(AUTHORIZATION_HEADER), "Bearer ", "");
 

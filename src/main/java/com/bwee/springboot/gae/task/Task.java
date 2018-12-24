@@ -17,6 +17,7 @@ public class Task {
   private String url;
   private String payload = ""; // error if null
   private Map<String, String> params = Maps.newHashMap();
+  private Map<String, String> headers = Maps.newHashMap();
   private TaskMethod method = TaskMethod.GET;
 
   public Task(final TaskFactory taskService) {
@@ -73,8 +74,17 @@ public class Task {
     return this;
   }
 
+  public Task header(final String key, final String value) {
+    headers.put(key, value);
+    return this;
+  }
+
   public Map<String, String> getParams() {
     return params;
+  }
+
+  public Map<String, String> getHeaders() {
+    return headers;
   }
 
   public void submit() {

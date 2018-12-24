@@ -5,6 +5,7 @@ import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
 import com.bwee.springboot.gae.auth.user.VerifiedUser;
 import com.google.appengine.api.users.UserService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -22,8 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.reset;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,11 +43,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthHandlerTest {
   private static final Logger LOG = LoggerFactory.getLogger(AuthHandlerTest.class);
 
+  private static final String VALID_AUTH_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJZdHpIRnBVYSIs" +
+      "ImZuIjoiSm9obiBEb2UiLCJybCI6WyJzYWxlcyJdLCJqdGkiOiJZdHpIRnBVYS0yMDE4LTEyLTI0VDE2OjE1OjE5Ljc5MyJ9.C4wLe-7" +
+      "SHdbzmm6BAWMiGsisrdchUa4knSPfhB3lvJQ";
+  private static final String INVALID_AUTH_TOKEN = "INVALID.TOKEN";
+
   @Autowired
   private MockMvc mvc;
 
   @Autowired
   private AuthTokenVerifier authTokenVerifier;
+
+  @Before
+  public void before() {
+    reset(authTokenVerifier);
+
+    doThrow(AuthorizationException.invalidToken("Invalid Token")).when(authTokenVerifier).verifyToken(any());
+
+    doReturn(VerifiedUser.withId("123").name("John", "Doe")).when(authTokenVerifier).verifyToken(VALID_AUTH_TOKEN);
+  }
 
   @Test
   public void testClassLevelSecured_shouldSecureAllClassMethods() throws Exception {
@@ -52,15 +70,14 @@ public class AuthHandlerTest {
 
   @Test
   public void testWithInvalidToken_shouldForbidAccess() throws Exception {
-    when(authTokenVerifier.verifyToken("INVALID")).thenThrow(AuthorizationException.invalidToken("Invalid Token"));
-    mvc.perform(get("/class/").header("Authorization", "Bearer INVALID")).andExpect(status().isForbidden());
+    mvc.perform(get("/class/").header("Authorization", "Bearer " + INVALID_AUTH_TOKEN))
+        .andExpect(status().isForbidden());
   }
 
   @Test
   public void testWithValidToken_shouldAllowAccess() throws Exception {
-    when(authTokenVerifier.verifyToken("VALID")).thenReturn(VerifiedUser.withId("123").name("John", "Doe"));
-    mvc.perform(get("/class/").header("Authorization", "Bearer VALID")).andExpect(status().isOk());
-    mvc.perform(get("/class/").header("Authorization", "VALID")).andExpect(status().isOk());
+    mvc.perform(get("/class/").header("Authorization", "Bearer " + VALID_AUTH_TOKEN)).andExpect(status().isOk());
+    mvc.perform(get("/class/").header("Authorization", VALID_AUTH_TOKEN)).andExpect(status().isOk());
   }
 
   @Test

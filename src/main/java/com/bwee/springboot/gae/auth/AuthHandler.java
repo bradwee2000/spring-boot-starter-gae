@@ -51,6 +51,7 @@ public class AuthHandler {
   @Before("method()")
   public void verifyAuthorization(final JoinPoint joinPoint) {
 
+
     // Allow GAE services to proceed
     if (checkIsService()) {
       return;

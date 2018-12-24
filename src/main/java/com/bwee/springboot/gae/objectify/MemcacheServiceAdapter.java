@@ -34,7 +34,7 @@ public class MemcacheServiceAdapter implements MemcacheService {
     final Map<String, IdentifiableValue> identifiables = service.getIdentifiables(collection).entrySet().stream()
           .collect(Collectors.toMap(e -> e.getKey(), e -> new IdentifiableValueAdapter(e.getValue())));
 
-    LOG.info("GET IDENTIFIABLES: {}={}", collection, identifiables);
+    LOG.info("GET IDENTIFIABLES: KEYS={} IDENTIFIABLES={}", collection, identifiables);
 
     return identifiables;
   }
@@ -43,7 +43,7 @@ public class MemcacheServiceAdapter implements MemcacheService {
   public Map<String, Object> getAll(Collection<String> collection) {
     final Map<String, Object> values = service.getAll(collection);
 
-    LOG.info("GET ALL: {}={}", collection, values);
+    LOG.info("GET ALL: KEYS={} VALUES={}", collection, values);
 
     return values;
   }
@@ -71,13 +71,14 @@ public class MemcacheServiceAdapter implements MemcacheService {
                     e.getValue().getNextToStore())));
     final Set<String> result = service.putIfUntouched(adapter);
 
-    LOG.info("PUT IF UNTOUCHED {}={}", map, result);
+    LOG.info("PUT IF UNTOUCHED MAP={}   RESULT={}", map, result);
 
     return result;
   }
 
   @Override
   public void deleteAll(Collection<String> collection) {
+    LOG.info("DELETE ALL {}", collection);
     service.deleteAll(collection);
   }
 }

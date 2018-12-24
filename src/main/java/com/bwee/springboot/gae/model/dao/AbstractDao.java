@@ -61,7 +61,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
    * Returns collection of entities given their ids.
    */
   public List<T> findByIds(final Collection<K> ids) {
-    if (ids == null) {
+    if (ids == null || ids.isEmpty()) {
       return Collections.emptyList();
     }
 

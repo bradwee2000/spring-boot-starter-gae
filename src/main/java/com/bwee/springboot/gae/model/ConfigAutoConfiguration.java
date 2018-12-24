@@ -16,11 +16,13 @@ import java.time.Clock;
 public class ConfigAutoConfiguration {
 
   @Bean
+  @ConditionalOnMissingBean(ConfigDao.class)
   public ConfigDao configDao(final Clock clock) {
     return new ConfigDao(clock);
   }
 
   @Bean
+  @ConditionalOnMissingBean(ConfigService.class)
   public ConfigService configService(final ConfigDao configDao, final Gson gson) {
     return new ConfigService(configDao, gson);
   }

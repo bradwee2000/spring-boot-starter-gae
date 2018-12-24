@@ -12,11 +12,13 @@ import org.springframework.context.annotation.Configuration;
 public class PubSubAutoConfiguration {
 
   @Bean
+  @ConditionalOnMissingBean(PublisherFactory.class)
   public PublisherFactory publisherFactory() {
     return new PublisherFactory();
   }
 
   @Bean
+  @ConditionalOnMissingBean(PubSubPublisher.class)
   public PubSubPublisher pubSubPublisher(final Gson gson, final PublisherFactory publisherFactory) {
     return new PubSubPublisher(gson, publisherFactory);
   }

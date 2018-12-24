@@ -27,6 +27,7 @@ import java.time.Clock;
 public class AuthAutoConfiguration {
 
   @Bean
+  @ConditionalOnMissingBean(JWTVerifier.class)
   public JWTVerifier jwtVerifier(final Algorithm algorithm) {
     return JWT.require(algorithm).build();
   }

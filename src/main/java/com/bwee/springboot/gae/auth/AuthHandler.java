@@ -97,7 +97,7 @@ public class AuthHandler {
     final Secured secured = extractAnnotation(joinPoint);
     final List<String> expectedRoles = Lists.newArrayList(secured.value());
 
-    final String token = StringUtils.replaceChars(request.getHeader(AUTHORIZATION_HEADER), "Bearer ", "");
+    final String token = StringUtils.replace(request.getHeader(AUTHORIZATION_HEADER), "Bearer ", "");
 
     if (StringUtils.isEmpty(token)) {
       throw AuthorizationException.missingToken();

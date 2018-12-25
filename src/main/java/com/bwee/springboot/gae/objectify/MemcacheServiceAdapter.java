@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.objectify;
 
+import com.google.common.collect.Maps;
 import com.googlecode.objectify.cache.IdentifiableValue;
 import com.googlecode.objectify.cache.MemcacheService;
 import org.slf4j.Logger;
@@ -30,11 +31,21 @@ public class MemcacheServiceAdapter implements MemcacheService {
   }
 
   @Override
-  public Map<String, IdentifiableValue> getIdentifiables(Collection<String> collection) {
-    final Map<String, IdentifiableValue> identifiables = service.getIdentifiables(collection).entrySet().stream()
-          .collect(Collectors.toMap(e -> e.getKey(), e -> new IdentifiableValueAdapter(e.getValue())));
+  public Map<String, IdentifiableValue> getIdentifiables(final Collection<String> keys) {
+    final Map<String, IdentifiableValue> identifiables = Maps.newHashMapWithExpectedSize(keys.size());
 
-    LOG.info("GET IDENTIFIABLES: KEYS={} IDENTIFIABLES={}", collection, identifiables);
+    identifiables.putAll(service.getIdentifiables(keys).entrySet().stream()
+        .collect(Collectors.toMap(
+            e -> e.getKey(),
+            e -> new IdentifiableValueAdapter(e.getValue()))));
+
+    final Map<String, IdentifiableValue> missing = keys.stream()
+        .filter(k -> !identifiables.containsKey(k))
+        .collect(Collectors.toMap(k -> k, k -> new IdentifiableValueAdapter().withValue(k)));
+
+    identifiables.putAll(missing);
+
+    LOG.info("GET IDENTIFIABLES: KEYS={} IDENTIFIABLES={}", keys, identifiables);
 
     return identifiables;
   }

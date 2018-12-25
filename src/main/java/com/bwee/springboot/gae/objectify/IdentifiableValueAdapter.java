@@ -15,6 +15,9 @@ public class IdentifiableValueAdapter implements IdentifiableValue {
     this.value = value;
   }
 
+  public IdentifiableValueAdapter() {
+  }
+
   @Override
   public Object getValue() {
     return value.getValue();

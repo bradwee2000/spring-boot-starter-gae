@@ -1,6 +1,7 @@
 package com.bwee.springboot.gae.model.service;
 
 import com.google.common.collect.Lists;
+import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,7 +34,7 @@ public class ListStoreServiceTest {
     when(configService.getProperty("test.list")).thenReturn(propertyConverter);
     when(propertyConverter.asType(any())).thenReturn(Optional.of(list));
 
-    listStoreService = new ListStoreService<>("test.list", configService);
+    listStoreService = new ListStoreService<>("test.list", new TypeToken<List<String>>() {}.getType(), configService);
   }
 
   @Test

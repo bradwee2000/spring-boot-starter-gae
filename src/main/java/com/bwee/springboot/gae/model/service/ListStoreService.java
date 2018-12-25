@@ -1,8 +1,8 @@
 package com.bwee.springboot.gae.model.service;
 
 import com.google.common.collect.Lists;
-import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -13,8 +13,8 @@ import java.util.Optional;
  */
 public class ListStoreService<T> extends AbstractStoreService<List<T>> {
 
-  public ListStoreService(final String namespace, final ConfigService configService) {
-    super(namespace, new TypeToken<List<T>>() {}.getType(), configService);
+  public ListStoreService(final String namespace, final Type type, final ConfigService configService) {
+    super(namespace, type, configService);
   }
 
   public List<T> get() {

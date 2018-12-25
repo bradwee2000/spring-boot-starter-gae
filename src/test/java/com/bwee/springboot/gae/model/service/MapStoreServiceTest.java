@@ -2,6 +2,8 @@ package com.bwee.springboot.gae.model.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,7 +37,7 @@ public class MapStoreServiceTest {
     when(configService.getProperty("test.map")).thenReturn(propertyConverter);
     when(propertyConverter.asType(any())).thenReturn(Optional.of(map));
 
-    mapStoreService = new MapStoreService("test.map", configService);
+    mapStoreService = new MapStoreService("test.map", new TypeToken<Map<String, String>>() {}.getType(), configService);
   }
 
   @Test
@@ -105,5 +107,16 @@ public class MapStoreServiceTest {
     assertThat(newMap).containsOnlyKeys("B");
 
     verify(configService).setProperty("test.map", newMap);
+  }
+
+  @Test
+  public void testWithIntValues_shouldReturnIntValues() {
+    final MapStoreService<String, Integer> intMapStoreService =
+        new MapStoreService("test.map", new TypeToken<Map<String, Integer>>(){}.getType(), configService);
+    final String jsonValue = "{\"LILAC\":1000}";
+    when(configService.getProperty("test.map"))
+        .thenReturn(new ConfigService.PropertyConverter(new Gson(), Optional.of(jsonValue)));
+
+    assertThat(intMapStoreService.get().get("LILAC")).isEqualTo(1000);
   }
 }

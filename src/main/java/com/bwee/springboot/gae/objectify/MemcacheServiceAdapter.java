@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.objectify;
 
+import com.google.appengine.api.memcache.Expiration;
 import com.google.common.collect.Maps;
 import com.googlecode.objectify.cache.IdentifiableValue;
 import com.googlecode.objectify.cache.MemcacheService;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class MemcacheServiceAdapter implements MemcacheService {
   private static final Logger LOG = LoggerFactory.getLogger(MemcacheServiceAdapter.class);
-
+  private static final Expiration EXPIRY_SECONDS = Expiration.byDeltaSeconds(60 * 60 * 24 * 7);
   private final com.google.appengine.api.memcache.MemcacheService service;
 
   public MemcacheServiceAdapter(com.google.appengine.api.memcache.MemcacheService service) {
@@ -26,7 +27,6 @@ public class MemcacheServiceAdapter implements MemcacheService {
   @Override
   public Object get(String s) {
     final Object val = service.get(s);
-    LOG.info("GET {}={}", s, val);
     return val;
   }
 
@@ -39,11 +39,11 @@ public class MemcacheServiceAdapter implements MemcacheService {
             e -> e.getKey(),
             e -> new IdentifiableValueAdapter(e.getValue()))));
 
-    final Map<String, IdentifiableValue> missing = keys.stream()
-        .filter(k -> !identifiables.containsKey(k))
-        .collect(Collectors.toMap(k -> k, k -> new IdentifiableValueAdapter().withValue(k)));
+//    final Map<String, IdentifiableValue> missing = keys.stream()
+//        .filter(k -> !identifiables.containsKey(k))
+//        .collect(Collectors.toMap(k -> k, k -> new IdentifiableValueAdapter().withValue(k)));
 
-    identifiables.putAll(missing);
+//    identifiables.putAll(missing);
 
     LOG.info("GET IDENTIFIABLES: KEYS={} IDENTIFIABLES={}", keys, identifiables);
 
@@ -53,26 +53,22 @@ public class MemcacheServiceAdapter implements MemcacheService {
   @Override
   public Map<String, Object> getAll(Collection<String> collection) {
     final Map<String, Object> values = service.getAll(collection);
-
-    LOG.info("GET ALL: KEYS={} VALUES={}", collection, values);
-
     return values;
   }
 
   @Override
   public void put(String s, Object o) {
-    LOG.info("PUT {}={}", s, o);
-    service.put(s, o);
+    service.put(s, o, EXPIRY_SECONDS);
   }
 
   @Override
   public void putAll(Map<String, Object> map) {
-    LOG.info("PUT ALL {}", map);
-    service.putAll(map);
+    service.putAll(map, EXPIRY_SECONDS);
   }
 
   @Override
   public Set<String> putIfUntouched(Map<String, CasPut> map) {
+    LOG.info("PUT IF UNTOUCHED MAP: {}", map);
 
     final Map<String, com.google.appengine.api.memcache.MemcacheService.CasValues> adapter = map.entrySet().stream()
         .collect(Collectors.toMap(
@@ -80,16 +76,13 @@ public class MemcacheServiceAdapter implements MemcacheService {
             e -> new com.google.appengine.api.memcache.MemcacheService.CasValues(
                     ((IdentifiableValueAdapter) e.getValue().getIv()).toGoogleIv(),
                     e.getValue().getNextToStore())));
-    final Set<String> result = service.putIfUntouched(adapter);
-
-    LOG.info("PUT IF UNTOUCHED MAP={}   RESULT={}", map, result);
+    final Set<String> result = service.putIfUntouched(adapter, EXPIRY_SECONDS);
 
     return result;
   }
 
   @Override
   public void deleteAll(Collection<String> collection) {
-    LOG.info("DELETE ALL {}", collection);
     service.deleteAll(collection);
   }
 }

@@ -25,8 +25,8 @@ public class ObjectifyAutoConfiguration {
   }
 
   @Bean
-  @ConditionalOnMissingBean(MemcacheService.class)
-  public MemcacheService memcacheServiceFactory() {
+  @ConditionalOnMissingBean(name = "ofyMemcacheService")
+  public MemcacheService ofyMemcacheService() {
     return MemcacheServiceFactory.getMemcacheService("objectify");
   }
 }

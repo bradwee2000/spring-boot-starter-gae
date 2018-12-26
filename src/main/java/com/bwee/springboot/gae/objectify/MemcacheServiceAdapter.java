@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,18 +35,25 @@ public class MemcacheServiceAdapter implements MemcacheService {
   public Map<String, IdentifiableValue> getIdentifiables(final Collection<String> keys) {
     final Map<String, IdentifiableValue> identifiables = Maps.newHashMapWithExpectedSize(keys.size());
 
+    // Retrieve identifiables from cache
     identifiables.putAll(service.getIdentifiables(keys).entrySet().stream()
         .collect(Collectors.toMap(
             e -> e.getKey(),
             e -> new IdentifiableValueAdapter(e.getValue()))));
 
-//    final Map<String, IdentifiableValue> missing = keys.stream()
-//        .filter(k -> !identifiables.containsKey(k))
-//        .collect(Collectors.toMap(k -> k, k -> new IdentifiableValueAdapter().withValue(k)));
+    // Check for any missing keys
+    final List<String> missingKeys = keys.stream()
+        .filter(k -> !identifiables.containsKey(k))
+        .collect(Collectors.toList());
 
-//    identifiables.putAll(missing);
+    // Insert blank for missing keys
+    putAll(missingKeys.stream().collect(Collectors.toMap(k -> k, k -> "")));
 
-    LOG.info("GET IDENTIFIABLES: KEYS={} IDENTIFIABLES={}", keys, identifiables);
+    // Retrieve identifiables for those missing
+    identifiables.putAll(service.getIdentifiables(missingKeys).entrySet().stream()
+        .collect(Collectors.toMap(
+            e -> e.getKey(),
+            e -> new IdentifiableValueAdapter(e.getValue()))));
 
     return identifiables;
   }
@@ -68,8 +76,6 @@ public class MemcacheServiceAdapter implements MemcacheService {
 
   @Override
   public Set<String> putIfUntouched(Map<String, CasPut> map) {
-    LOG.info("PUT IF UNTOUCHED MAP: {}", map);
-
     final Map<String, com.google.appengine.api.memcache.MemcacheService.CasValues> adapter = map.entrySet().stream()
         .collect(Collectors.toMap(
             e -> e.getKey(),

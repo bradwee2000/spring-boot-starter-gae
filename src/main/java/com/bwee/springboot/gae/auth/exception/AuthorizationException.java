@@ -12,16 +12,12 @@ import java.util.Collection;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.EXPIRED_TOKEN;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INSUFFICIENT_RIGHTS;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INVALID_TOKEN;
-import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.MISSING_TOKEN;
 
 /**
  * @author bradwee2000@gmail.com
  */
 @ResponseStatus(code = HttpStatus.FORBIDDEN)
 public class AuthorizationException extends RuntimeException {
-  public static AuthorizationException missingToken() {
-    return new AuthorizationException(MISSING_TOKEN);
-  }
 
   public static AuthorizationException invalidToken(final String token) {
     return new AuthorizationException(INVALID_TOKEN, "Token: " + token);
@@ -39,10 +35,9 @@ public class AuthorizationException extends RuntimeException {
   }
 
   public enum ErrorType {
-    MISSING_TOKEN("Missing access token."),
     INVALID_TOKEN("Invalid access token."),
-    INSUFFICIENT_RIGHTS("User has insufficient rights."),
-    EXPIRED_TOKEN("Expired access token.");
+    INSUFFICIENT_RIGHTS("You have insufficient rights."),
+    EXPIRED_TOKEN("Your session has expired. Please login again.");
 
     String message;
 

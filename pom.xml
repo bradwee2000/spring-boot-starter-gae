@@ -49,7 +49,6 @@
             <artifactId>spring-security-core</artifactId>
         </dependency>
 
-
         <!--Google-->
         <dependency>
             <groupId>com.google.appengine</groupId>

@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.auth;
 
+import com.bwee.springboot.gae.auth.exception.AuthenticationException;
 import com.bwee.springboot.gae.auth.exception.AuthorizationException;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
@@ -50,8 +51,6 @@ public class AuthHandler {
 
   @Before("method()")
   public void verifyAuthorization(final JoinPoint joinPoint) {
-
-
     // Allow GAE services to proceed
     if (checkIsService()) {
       return;
@@ -101,7 +100,7 @@ public class AuthHandler {
     final String token = StringUtils.replace(request.getHeader(AUTHORIZATION_HEADER), "Bearer ", "");
 
     if (StringUtils.isEmpty(token)) {
-      throw AuthorizationException.missingToken();
+      throw AuthenticationException.missingToken();
     }
 
     // Must have valid token

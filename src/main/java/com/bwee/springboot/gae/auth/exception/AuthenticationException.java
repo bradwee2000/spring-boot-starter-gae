@@ -9,7 +9,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
 public class AuthenticationException extends RuntimeException {
 
-  public AuthenticationException() {
-    super("Invalid credentials.");
+  public static final String INVALID_CREDENTIALS = "Invalid credentials.";
+  public static final String MISSING_TOKEN = "You need to be logged in.";
+
+  public static final AuthenticationException invalidCredentials() {
+    return new AuthenticationException(INVALID_CREDENTIALS);
+  }
+
+  public static final AuthenticationException missingToken() {
+    return new AuthenticationException(MISSING_TOKEN);
+  }
+
+  public AuthenticationException(final String msg) {
+    super(msg);
   }
 }

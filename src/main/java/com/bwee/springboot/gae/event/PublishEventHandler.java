@@ -8,16 +8,11 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Publish returned object to topic in Google PubSub.
@@ -39,29 +34,30 @@ public class PublishEventHandler {
   public void publishEvent(final JoinPoint joinPoint, final Object result) {
     final PublishEvent event = extractEvent(joinPoint);
     final String topicName = event.value();
-    final Map<String, String> attributes = extractRequestAttributes();
+    final Map<String, String> attributes = extractAttributes(result);
+    final Object payload = extractPayload(result);
 
     // If it's a collection, publish each item
-    if (event.itemized() && result instanceof Collection) {
+    if (event.itemized() && payload instanceof Collection) {
       ((Collection)result).stream().forEach(item -> publisher.publish(topicName, item, attributes));
     } else {
-      publisher.publish(topicName, result, attributes);
+      publisher.publish(topicName, payload, attributes);
     }
   }
 
-  /**
-   * Extract query parameters from HttpServletRequest if there are any.
-   */
-  private Map<String, String> extractRequestAttributes() {
-    final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
-        .currentRequestAttributes()).getRequest();
-
-    if (request == null) {
-      return Collections.emptyMap();
+  private Map<String,String> extractAttributes(Object result) {
+    if (result instanceof EventPayload) {
+      return ((EventPayload) result).getAttributes();
     }
 
-    return request.getParameterMap().entrySet().stream()
-        .collect(Collectors.toMap(e -> e.getKey(), e -> Arrays.toString(e.getValue())));
+    return Collections.emptyMap();
+  }
+
+  private Object extractPayload(Object result) {
+    if (result instanceof EventPayload) {
+      return ((EventPayload) result).getPayload();
+    }
+    return result;
   }
 
   /**

@@ -74,8 +74,18 @@ public class Task {
     return this;
   }
 
+  public Task params(final Map<String, String> params) {
+    params.putAll(params);
+    return this;
+  }
+
   public Task header(final String key, final String value) {
     headers.put(key, value);
+    return this;
+  }
+
+  public Task header(final Map<String, String> params) {
+    headers.putAll(params);
     return this;
   }
 

@@ -41,6 +41,7 @@ public class PushToTaskRouterController {
         .setMethod(TaskMethod.POST)
         .setQueueName(taskName)
         .setPayload(json)
+        .params(pubSubMessage.getMessage().getAttributes())
         .submit();
     return ResponseEntity.ok().build();
   }

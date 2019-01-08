@@ -18,7 +18,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
+import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -46,33 +49,33 @@ public class PublishEventHandlerTest {
   @Test
   public void testReturnList_shouldPublishEventForList() {
     service.saveAndReturnList();
-    verify(publisher).publish("entity-saved", Lists.newArrayList("A", "B", "C"));
+    verify(publisher).publish("entity-saved", Lists.newArrayList("A", "B", "C"), emptyMap());
   }
 
   @Test
   public void testReturnListWithItemized_shouldPublishEventForEachItemInList() {
     service.saveAndReturnItemizedList();
-    verify(publisher).publish("entity-saved", "A");
-    verify(publisher).publish("entity-saved", "B");
-    verify(publisher).publish("entity-saved", "C");
+    verify(publisher).publish("entity-saved", "A", emptyMap());
+    verify(publisher).publish("entity-saved", "B", emptyMap());
+    verify(publisher).publish("entity-saved", "C", emptyMap());
   }
 
   @Test
   public void testReturnString_shouldPublishEvent() {
     service.saveAndReturnString();
-    verify(publisher).publish("entity-saved", "Success");
+    verify(publisher).publish("entity-saved", "Success", emptyMap());
   }
 
   @Test
   public void testReturnVoid_shouldPublishEvent() {
     service.saveAndReturnVoid();
-    verify(publisher).publish("entity-saved", null);
+    verify(publisher).publish("entity-saved", null, emptyMap());
   }
 
   @Test
   public void testWithNoPublishEvent_shouldNotPublishEvent() {
     service.saveWithNoPublishEvent();
-    verify(publisher, Mockito.times(0)).publish(any(), any());
+    verify(publisher, times(0)).publish(any(), any());
   }
 
   /**
@@ -84,7 +87,7 @@ public class PublishEventHandlerTest {
 
     @Bean
     public PubSubPublisher pubSubPublisher() {
-      return Mockito.mock(PubSubPublisher.class);
+      return mock(PubSubPublisher.class);
     }
   }
 

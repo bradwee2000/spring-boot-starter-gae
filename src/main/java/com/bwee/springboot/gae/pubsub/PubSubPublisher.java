@@ -7,6 +7,9 @@ import com.google.pubsub.v1.PubsubMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.Map;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -26,11 +29,16 @@ public class PubSubPublisher {
   }
 
   public void publish(final String topic, final Object payload) {
+    publish(topic, payload, Collections.emptyMap());
+  }
+
+  public void publish(final String topic, final Object payload, final Map<String, String> attributes) {
     // Create json payload
     final String jsonPayload = gson.toJson(payload);
 
     // Create message
     final PubsubMessage message = PubsubMessage.newBuilder()
+        .putAllAttributes(attributes)
         .setData(ByteString.copyFromUtf8(jsonPayload))
         .build();
 

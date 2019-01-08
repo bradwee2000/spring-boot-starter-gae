@@ -65,7 +65,7 @@ public class AuthHandlerTest {
 
   @Test
   public void testClassLevelSecured_shouldSecureAllClassMethods() throws Exception {
-    mvc.perform(get("/class/")).andExpect(status().isForbidden());
+    mvc.perform(get("/class/")).andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -82,7 +82,7 @@ public class AuthHandlerTest {
 
   @Test
   public void testMethodSecured_shouldSecureMethod() throws Exception {
-    mvc.perform(get("/method/")).andExpect(status().isForbidden());
+    mvc.perform(get("/method/")).andExpect(status().isUnauthorized());
   }
 
   @Test

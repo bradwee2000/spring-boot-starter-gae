@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,6 +55,22 @@ public class VerifiedUser {
 
   public List<String> getRoles() {
     return roles;
+  }
+
+  public boolean hasAnyRole(final String role, final String ... more) {
+    return hasAnyRole(Lists.asList(role, more));
+  }
+
+  public boolean hasAnyRole(final Collection<String> roles) {
+    return this.roles.stream().filter(r -> roles.contains(r)).findFirst().isPresent();
+  }
+
+  public boolean hasAllRoles(final String role, final String ... more) {
+    return hasAllRoles(Lists.asList(role, more));
+  }
+
+  public boolean hasAllRoles(final Collection<String> roles) {
+    return this.roles.containsAll(roles);
   }
 
   public VerifiedUser roles(final List<String> roles) {

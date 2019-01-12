@@ -3,6 +3,8 @@ package com.bwee.springboot.gae.auth.jwt;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.bwee.springboot.gae.auth.user.VerifiedUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -13,6 +15,7 @@ import java.util.List;
  * @author bradwee2000@gmail.com
  */
 public class SimpleTokenTranslator<T extends VerifiedUser> implements TokenTranslator<T> {
+  private static final Logger LOG = LoggerFactory.getLogger(SimpleTokenTranslator.class);
   private static final String FIRSTNAME = "fn";
   private static final String LASTNAME = "ln";
   private static final String ROLES = "rl";
@@ -35,12 +38,11 @@ public class SimpleTokenTranslator<T extends VerifiedUser> implements TokenTrans
   }
 
   @Override
-  public T decode(DecodedJWT decodedJWT) {
+  public T decode(final DecodedJWT decodedJWT) {
     final String id = decodedJWT.getSubject();
     final String firstname = decodedJWT.getClaim(FIRSTNAME).asString();
     final String lastname = decodedJWT.getClaim(LASTNAME).asString();
     final List<String> roles = decodedJWT.getClaim(ROLES).asList(String.class);
-
     final T user = (T) createUser(id).name(firstname, lastname).roles(roles);
     return user;
   }

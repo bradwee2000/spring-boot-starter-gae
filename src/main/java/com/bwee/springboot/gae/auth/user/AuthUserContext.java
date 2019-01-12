@@ -5,19 +5,19 @@ import javax.inject.Provider;
 /**
  * @author bradwee2000@gmail.com
  */
-public class AuthUserContext {
+public class AuthUserContext<T extends VerifiedUser> {
 
-  private final Provider<AuthUserHolder> contextProvider;
+  private final Provider<AuthUserHolder<T>> contextProvider;
 
-  public AuthUserContext(Provider<AuthUserHolder> contextProvider) {
+  public AuthUserContext(Provider<AuthUserHolder<T>> contextProvider) {
     this.contextProvider = contextProvider;
   }
 
-  public VerifiedUser getAuthUser() {
+  public T getAuthUser() {
     return contextProvider.get().getUser();
   }
 
-  public void setAuthUser(final VerifiedUser user) {
+  public void setAuthUser(final T user) {
     contextProvider.get().setUser(user);
   }
 }

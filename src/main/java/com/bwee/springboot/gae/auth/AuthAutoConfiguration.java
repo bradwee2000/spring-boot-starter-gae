@@ -62,7 +62,7 @@ public class AuthAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean(TokenTranslator.class)
-  public TokenTranslator tokenTranslator(Clock clock) {
+  public TokenTranslator tokenTranslator(final Clock clock) {
     return new SimpleTokenTranslator(clock);
   }
 

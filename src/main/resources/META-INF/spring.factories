@@ -1,5 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.bwee.springboot.gae.auth.AuthAutoConfiguration,\
+  com.bwee.springboot.gae.cache.CacheConfiguration,\
   com.bwee.springboot.gae.model.ConfigAutoConfiguration,\
   com.bwee.springboot.gae.event.EventAutoConfiguration,\
   com.bwee.springboot.gae.image.ImageAutoConfiguration,\

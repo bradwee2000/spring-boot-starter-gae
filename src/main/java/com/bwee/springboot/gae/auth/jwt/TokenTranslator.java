@@ -7,9 +7,9 @@ import com.bwee.springboot.gae.auth.user.VerifiedUser;
 /**
  * @author bradwee2000@gmail.com
  */
-public abstract class TokenTranslator<T extends VerifiedUser> {
+public interface TokenTranslator<T extends VerifiedUser> {
 
-  public abstract JWTCreator.Builder toJwt(T t, JWTCreator.Builder jwtBuilder);
+  JWTCreator.Builder toJwt(T t, JWTCreator.Builder jwtBuilder);
 
-  public abstract T decode(DecodedJWT decodedJWT);
+  T decode(DecodedJWT decodedJWT);
 }

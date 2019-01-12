@@ -46,16 +46,16 @@ public class PublishEventHandler {
   }
 
   private Map<String,String> extractAttributes(Object result) {
-    if (result instanceof EventPayload) {
-      return ((EventPayload) result).getAttributes();
+    if (result instanceof Result) {
+      return ((Result) result).getAttributes();
     }
 
     return Collections.emptyMap();
   }
 
   private Object extractPayload(Object result) {
-    if (result instanceof EventPayload) {
-      return ((EventPayload) result).getPayload();
+    if (result instanceof Result) {
+      return ((Result) result).getValue();
     }
     return result;
   }

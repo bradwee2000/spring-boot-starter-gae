@@ -1,6 +1,6 @@
 package com.bwee.springboot.gae.auth.user;
 
-public class AuthUserHolder<T extends VerifiedUser> {
+public class AuthUserHolder<T extends AuthUser> {
 
   private T user;
 

@@ -3,7 +3,7 @@ package com.bwee.springboot.gae.auth;
 import com.bwee.springboot.gae.auth.exception.AuthorizationException;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
-import com.bwee.springboot.gae.auth.user.VerifiedUser;
+import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
 import com.google.appengine.api.users.UserService;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +60,7 @@ public class AuthHandlerTest {
 
     doThrow(AuthorizationException.invalidToken("Invalid Token")).when(authTokenVerifier).verifyToken(any());
 
-    doReturn(VerifiedUser.withId("123").name("John", "Doe")).when(authTokenVerifier).verifyToken(VALID_AUTH_TOKEN);
+    doReturn(SimpleAuthUser.withId("123").name("John")).when(authTokenVerifier).verifyToken(VALID_AUTH_TOKEN);
   }
 
   @Test

@@ -11,48 +11,41 @@ import java.util.List;
 /**
  * @author bradwee2000@gmail.com
  */
-public class VerifiedUser {
+public class SimpleAuthUser implements AuthUser {
 
-  public static VerifiedUser withId(final String id) {
-    return new VerifiedUser(id);
+  public static SimpleAuthUser withId(final String id) {
+    return new SimpleAuthUser(id);
   }
 
   private final String id;
-  private final String firstname;
-  private final String lastname;
+  private final String name;
   private final List<String> roles;
 
-  public VerifiedUser(final String id) {
-    this(id, null, null, Collections.emptyList());
+  public SimpleAuthUser(final String id) {
+    this(id, null, Collections.emptyList());
   }
 
-  public VerifiedUser(String id, String firstname, String lastname, List<String> roles) {
+  public SimpleAuthUser(String id, String name, List<String> roles) {
     this.id = id;
-    this.firstname = firstname;
-    this.lastname = lastname;
+    this.name = name;
     this.roles = roles;
   }
 
+  @Override
   public String getId() {
     return id;
   }
 
-  public String getFirstname() {
-    return firstname;
+  @Override
+  public String getName() {
+    return name;
   }
 
-  public String getLastname() {
-    return lastname;
+  public SimpleAuthUser name(final String name) {
+    return new SimpleAuthUser(id, name , roles);
   }
 
-  public VerifiedUser name(final String firstname) {
-    return new VerifiedUser(id, firstname, null, roles);
-  }
-
-  public VerifiedUser name(final String firstname, final String lastname) {
-    return new VerifiedUser(id, firstname, lastname, roles);
-  }
-
+  @Override
   public List<String> getRoles() {
     return roles;
   }
@@ -73,11 +66,11 @@ public class VerifiedUser {
     return this.roles.containsAll(roles);
   }
 
-  public VerifiedUser roles(final List<String> roles) {
-    return new VerifiedUser(id, firstname, lastname, roles);
+  public SimpleAuthUser roles(final List<String> roles) {
+    return new SimpleAuthUser(id, name, roles);
   }
 
-  public VerifiedUser roles(final String role, final String ... more) {
+  public SimpleAuthUser roles(final String role, final String ... more) {
     return roles(Lists.asList(role, more));
   }
 
@@ -85,23 +78,23 @@ public class VerifiedUser {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    VerifiedUser that = (VerifiedUser) o;
+    SimpleAuthUser that = (SimpleAuthUser) o;
     return id == that.id &&
-            Objects.equal(firstname, that.firstname) &&
-            Objects.equal(lastname, that.lastname) &&
+
+            Objects.equal(name, that.name) &&
             Objects.equal(roles, that.roles);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id, firstname, lastname, roles);
+    return Objects.hashCode(id, name, roles);
   }
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
             .add("id", id)
-            .add("name", firstname + " " + lastname)
+            .add("name", name)
             .add("roles", roles)
             .toString();
   }

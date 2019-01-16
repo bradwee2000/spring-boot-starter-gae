@@ -3,8 +3,9 @@ package com.bwee.springboot.gae.auth;
 import com.bwee.springboot.gae.auth.exception.AuthenticationException;
 import com.bwee.springboot.gae.auth.exception.AuthorizationException;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
+import com.bwee.springboot.gae.auth.user.AuthUser;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
-import com.bwee.springboot.gae.auth.user.VerifiedUser;
+import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.common.collect.Lists;
@@ -67,7 +68,7 @@ public class AuthHandler {
   private boolean checkIsAdmin() {
     if (userService.isUserLoggedIn() && userService.isUserAdmin()) {
       final User user = userService.getCurrentUser();
-      final VerifiedUser verifiedUser = new VerifiedUser(user.getUserId()).name(user.getNickname()).roles("admin");
+      final AuthUser verifiedUser = new SimpleAuthUser(user.getUserId()).name(user.getNickname()).roles("admin");
       authUserContext.setAuthUser(verifiedUser);
       return true;
     }
@@ -82,7 +83,7 @@ public class AuthHandler {
 
     if (!StringUtils.isEmpty(request.getHeader(TASK_NAME_HEADER))) {
       final String taskName = request.getHeader(TASK_NAME_HEADER);
-      authUserContext.setAuthUser(new VerifiedUser(taskName).roles("task", "service"));
+      authUserContext.setAuthUser(new SimpleAuthUser(taskName).roles("task", "service"));
       return true;
     }
     return false;
@@ -104,7 +105,7 @@ public class AuthHandler {
     }
 
     // Must have valid token
-    final VerifiedUser user = tokenVerifier.verifyToken(token);
+    final SimpleAuthUser user = tokenVerifier.verifyToken(token);
 
     // Must have all required roles
     if (!user.getRoles().containsAll(expectedRoles)) {

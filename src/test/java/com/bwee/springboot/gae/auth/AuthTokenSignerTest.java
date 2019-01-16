@@ -4,7 +4,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenSigner;
 import com.bwee.springboot.gae.auth.jwt.TokenTranslator;
-import com.bwee.springboot.gae.auth.user.VerifiedUser;
+import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +28,7 @@ public class AuthTokenSignerTest {
   private final Clock clock = Clock.fixed(now.toInstant(OffsetDateTime.now().getOffset()), ZoneId.systemDefault());
   private final Algorithm algorithm = Algorithm.HMAC256("dth6MC2pyMdgF7CHtcr93YgBt");
 
-  private VerifiedUser verifiedUser;
+  private SimpleAuthUser verifiedUser;
   private AuthTokenSigner tokenSigner;
   private TokenTranslator tokenTranslator;
   private JWTCreator.Builder jwtBuilder;
@@ -37,7 +37,7 @@ public class AuthTokenSignerTest {
   public void before() {
     tokenTranslator = mock(TokenTranslator.class);
     jwtBuilder = mock(JWTCreator.Builder.class);
-    verifiedUser = VerifiedUser.withId("xyz").name("John", "Doe").roles("Viewer");
+    verifiedUser = SimpleAuthUser.withId("xyz").name("John").roles("Viewer");
 
     when(tokenTranslator.toJwt(eq(verifiedUser), any())).thenReturn(jwtBuilder);
     when(jwtBuilder.sign(algorithm)).thenReturn("success");

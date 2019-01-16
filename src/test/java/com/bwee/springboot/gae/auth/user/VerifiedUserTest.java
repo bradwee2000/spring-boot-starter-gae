@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class VerifiedUserTest {
 
-  private VerifiedUser user = new VerifiedUser("testId").roles("Admin", "Sales");
+  private SimpleAuthUser user = new SimpleAuthUser("testId").roles("Admin", "Sales");
 
   @Test
   public void testHasAnyRole_shouldReturnTrueIfContainsAnyRole() {

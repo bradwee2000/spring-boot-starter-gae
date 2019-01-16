@@ -2,7 +2,7 @@ package com.bwee.springboot.gae.auth.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.bwee.springboot.gae.auth.user.VerifiedUser;
+import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
 
 /**
  * @author bradwee2000@gmail.com
@@ -18,7 +18,7 @@ public class AuthTokenSigner {
     this.tokenTranslator = tokenTranslator;
   }
 
-  public String signToken(final VerifiedUser user) {
+  public String signToken(final SimpleAuthUser user) {
     return tokenTranslator.toJwt(user, JWT.create()).sign(signingAlgorithm);
   }
 }

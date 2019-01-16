@@ -5,7 +5,7 @@ import javax.inject.Provider;
 /**
  * @author bradwee2000@gmail.com
  */
-public class AuthUserContext<T extends VerifiedUser> {
+public class AuthUserContext<T extends AuthUser> {
 
   private final Provider<AuthUserHolder<T>> contextProvider;
 

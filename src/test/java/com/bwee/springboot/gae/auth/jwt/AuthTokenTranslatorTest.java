@@ -1,7 +1,7 @@
 package com.bwee.springboot.gae.auth.jwt;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
+import com.bwee.springboot.gae.auth.user.AuthUser;
 import com.google.common.collect.Lists;
 import org.junit.Test;
 
@@ -15,9 +15,9 @@ import static org.mockito.Mockito.when;
 /**
  * @author bradwee2000@gmail.com
  */
-public class SimpleTokenTranslatorTest {
+public class AuthTokenTranslatorTest {
 
-  private SimpleTokenTranslator translator = new SimpleTokenTranslator(Clock.systemDefaultZone());
+  private AuthTokenTranslator translator = new AuthTokenTranslator(Clock.systemDefaultZone());
 
   @Test
   public void testDecode_shouldReturnVerifiedUser() {
@@ -26,7 +26,7 @@ public class SimpleTokenTranslatorTest {
     when(decoded.getClaim("nm").asString()).thenReturn("John");
     when(decoded.getClaim("rl").asList(String.class)).thenReturn(Lists.newArrayList("Role1", "Role2"));
 
-    final SimpleAuthUser user = translator.decode(decoded);
+    final AuthUser user = translator.decode(decoded);
     assertThat(user).isNotNull();
     assertThat(user.getId()).isEqualTo("123");
     assertThat(user.getName()).isEqualTo("John");

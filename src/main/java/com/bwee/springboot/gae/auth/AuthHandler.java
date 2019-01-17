@@ -105,7 +105,7 @@ public class AuthHandler {
     }
 
     // Must have valid token
-    final SimpleAuthUser user = tokenVerifier.verifyToken(token);
+    final AuthUser user = tokenVerifier.verifyToken(token);
 
     // Must have all required roles
     if (!user.getRoles().containsAll(expectedRoles)) {

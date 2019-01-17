@@ -5,22 +5,23 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.bwee.springboot.gae.auth.exception.AuthorizationException;
-import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
+import com.bwee.springboot.gae.auth.user.AuthUser;
 
 /**
  * @author bradwee2000@gmail.com
  */
-public class AuthTokenVerifier {
+public class AuthTokenVerifier<T extends AuthUser> {
 
   private final JWTVerifier jwtVerifier;
-  private final TokenTranslator tokenTranslator;
+  private final TokenTranslator<T> tokenTranslator;
 
-  public AuthTokenVerifier(final JWTVerifier jwtVerifier, final TokenTranslator tokenTranslator) {
+  public AuthTokenVerifier(final JWTVerifier jwtVerifier,
+                           final TokenTranslator<T> tokenTranslator) {
     this.jwtVerifier = jwtVerifier;
     this.tokenTranslator = tokenTranslator;
   }
 
-  public SimpleAuthUser verifyToken(final String token) {
+  public T verifyToken(final String token) {
     try {
       final DecodedJWT decodedJWT = jwtVerifier.verify(token);
       return tokenTranslator.decode(decodedJWT);

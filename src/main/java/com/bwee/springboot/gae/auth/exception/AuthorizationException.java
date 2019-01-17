@@ -1,6 +1,6 @@
 package com.bwee.springboot.gae.auth.exception;
 
-import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
+import com.bwee.springboot.gae.auth.user.AuthUser;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -27,9 +27,9 @@ public class AuthorizationException extends RuntimeException {
     return new AuthorizationException(EXPIRED_TOKEN, "Token: " + token);
   }
 
-  public static AuthorizationException missingRoles(final SimpleAuthUser verifiedUser,
+  public static AuthorizationException missingRoles(final AuthUser authUser,
                                                     final Collection<String> requiredRoles) {
-    final String msg = "User " + verifiedUser + " has insufficient roles. Required: "
+    final String msg = "User " + authUser + " has insufficient roles. Required: "
         + Joiner.on(", ").join(requiredRoles);
     return new AuthorizationException(INSUFFICIENT_RIGHTS, msg);
   }

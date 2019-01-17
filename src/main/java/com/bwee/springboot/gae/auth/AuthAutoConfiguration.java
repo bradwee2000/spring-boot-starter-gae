@@ -5,7 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenSigner;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
-import com.bwee.springboot.gae.auth.jwt.SimpleTokenTranslator;
+import com.bwee.springboot.gae.auth.jwt.AuthTokenTranslator;
 import com.bwee.springboot.gae.auth.jwt.TokenTranslator;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
 import com.bwee.springboot.gae.auth.user.AuthUserHolder;
@@ -63,7 +63,7 @@ public class AuthAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean(TokenTranslator.class)
   public TokenTranslator tokenTranslator(final Clock clock) {
-    return new SimpleTokenTranslator(clock);
+    return new AuthTokenTranslator(clock);
   }
 
   @Bean

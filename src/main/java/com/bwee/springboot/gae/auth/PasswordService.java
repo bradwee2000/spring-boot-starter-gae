@@ -28,7 +28,7 @@ public class PasswordService {
    * Computes a salted PBKDF2 hash of given plaintext password
    * suitable for storing in a database. Empty passwords are not supported.
    */
-  public String getSaltedHash(String password) {
+  public String getSaltedHash(final String password) {
     byte[] salt = new byte[0];
     try {
       salt = SecureRandom.getInstance("SHA1PRNG").generateSeed(saltLen);
@@ -42,7 +42,7 @@ public class PasswordService {
   /**
    * Checks whether given plaintext password corresponds to a stored salted hash of the password.
    */
-  public boolean check(String password, String stored) {
+  public boolean check(final String password, final String stored) {
     String[] saltAndHash = stored.split("\\$");
     if (saltAndHash.length != 2) {
       throw new IllegalStateException("The stored password must have the form 'salt$hash'");
@@ -58,11 +58,11 @@ public class PasswordService {
 
   // using PBKDF2 from Sun, an alternative is https://github.com/wg/scrypt
   // cf. http://www.unlimitednovelty.com/2012/03/dont-use-bcrypt.html
-  private static String hash(String password, byte[] salt) throws Exception {
+  private static String hash(final String password, final byte[] salt) throws Exception {
     if (password == null || password.length() == 0)
       throw new IllegalArgumentException("Empty passwords are not supported.");
-    SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-    SecretKey key = f.generateSecret(new PBEKeySpec(
+    final SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+    final SecretKey key = f.generateSecret(new PBEKeySpec(
         password.toCharArray(), salt, iterations, desiredKeyLen));
     return Base64.encodeBase64String(key.getEncoded());
   }

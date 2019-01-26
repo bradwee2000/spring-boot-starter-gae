@@ -1,9 +1,11 @@
 package com.bwee.springboot.gae.model.translator;
 
+import com.google.cloud.datastore.NullValue;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
 import com.google.cloud.datastore.ValueType;
 import com.googlecode.objectify.impl.translate.SimpleTranslatorFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,11 +26,17 @@ public class LocalDateTimeTranslatorFactory extends SimpleTranslatorFactory<Loca
 
   @Override
   protected LocalDateTime toPojo(Value<String> value) {
+    if (StringUtils.isEmpty(value.get())) {
+      return null;
+    }
     return LocalDateTime.parse(value.get(), DATE_TIME_FORMAT);
   }
 
   @Override
-  protected Value<String> toDatastore(LocalDateTime localDateTime) {
+  protected Value toDatastore(LocalDateTime localDateTime) {
+    if (localDateTime == null) {
+      return NullValue.of();
+    }
     return StringValue.of(localDateTime.format(DATE_TIME_FORMAT));
   }
 }

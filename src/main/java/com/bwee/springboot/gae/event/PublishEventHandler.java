@@ -34,6 +34,9 @@ public class PublishEventHandler {
   public void publishEvent(final JoinPoint joinPoint, final Object result) {
     final PublishEvent event = extractEvent(joinPoint);
     final String topicName = event.value();
+
+    LOG.info("Publishing event to topic {}: {} ", topicName, result);
+
     final Map<String, String> attributes = extractAttributes(result);
     final Object payload = extractPayload(result);
 

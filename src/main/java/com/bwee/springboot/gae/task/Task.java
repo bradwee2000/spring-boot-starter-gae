@@ -19,6 +19,7 @@ public class Task {
   private Map<String, String> params = Maps.newHashMap();
   private Map<String, String> headers = Maps.newHashMap();
   private TaskMethod method = TaskMethod.GET;
+  private String contentType = "application/json; charset=UTF-8";
 
   public Task(final TaskFactory taskService) {
     this.taskFactory = taskService;
@@ -86,6 +87,15 @@ public class Task {
 
   public Task header(final Map<String, String> params) {
     headers.putAll(params);
+    return this;
+  }
+
+  public String getContentType() {
+    return contentType;
+  }
+
+  public Task setContentType(String contentType) {
+    this.contentType = contentType;
     return this;
   }
 

@@ -1,7 +1,8 @@
 package com.bwee.springboot.gae.pubsub;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.pubsub.v1.Publisher;
-import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 import org.slf4j.Logger;
@@ -20,11 +21,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class PubSubPublisher {
   private static final Logger LOG = LoggerFactory.getLogger(PubSubPublisher.class);
 
-  private final Gson gson;
+  private final ObjectMapper om;
   private final PublisherFactory publisherFactory;
 
-  public PubSubPublisher(final Gson gson, final PublisherFactory publisherFactory) {
-    this.gson = gson;
+  public PubSubPublisher(final ObjectMapper om, final PublisherFactory publisherFactory) {
+    this.om = om;
     this.publisherFactory = publisherFactory;
   }
 
@@ -34,7 +35,7 @@ public class PubSubPublisher {
 
   public void publish(final String topic, final Object payload, final Map<String, String> attributes) {
     // Create json payload
-    final String jsonPayload = gson.toJson(payload);
+    final String jsonPayload = toJson(payload);
 
     // Create message
     final PubsubMessage message = PubsubMessage.newBuilder()
@@ -46,5 +47,13 @@ public class PubSubPublisher {
     final Publisher publisher = publisherFactory.get(topic);
     checkNotNull(publisher, "No publisher found for topic: " + topic);
     publisher.publish(message);
+  }
+
+  private String toJson(final Object payload) {
+    try {
+      return om.writeValueAsString(payload);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

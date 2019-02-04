@@ -48,7 +48,7 @@ public class TaskFactoryTest {
     verify(queue).add(captor.capture());
 
     final TaskOptions task = captor.getValue();
-    assertThat(task.getUrl()).isEqualTo("/tasks/test");
+    assertThat(task.getUrl()).isEqualTo("/tasks/test/");
     assertThat(task.getPayload()).isEqualTo("Hello World!".getBytes());
     assertThat(task.getMethod()).isEqualTo(TaskOptions.Method.POST);
     assertThat(task.getHeaders().get("X-HEADER")).containsExactly("1234");

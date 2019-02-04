@@ -1,6 +1,6 @@
 package com.bwee.springboot.gae.pubsub;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,13 +19,13 @@ public class PubSubAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean(PubSubPublisher.class)
-  public PubSubPublisher pubSubPublisher(final Gson gson, final PublisherFactory publisherFactory) {
-    return new PubSubPublisher(gson, publisherFactory);
+  public PubSubPublisher pubSubPublisher(final ObjectMapper om, final PublisherFactory publisherFactory) {
+    return new PubSubPublisher(om, publisherFactory);
   }
 
   @Bean
-  @ConditionalOnMissingBean(Gson.class)
-  public Gson gson() {
-    return new Gson();
+  @ConditionalOnMissingBean(ObjectMapper.class)
+  public ObjectMapper objectMapper() {
+    return new ObjectMapper();
   }
 }

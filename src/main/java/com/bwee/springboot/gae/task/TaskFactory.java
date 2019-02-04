@@ -73,6 +73,9 @@ public class TaskFactory {
     // Add other headers
     task.getHeaders().entrySet().forEach(e -> taskOptions.header(e.getKey(), e.getValue()));
 
+    // Replace content type. Need to remove first otherwise it will append.
+    taskOptions.removeHeader("content-type").header("content-type", task.getContentType());
+
     // Add parameters
     task.getParams().forEach((key, value) -> taskOptions.param(key, value));
 

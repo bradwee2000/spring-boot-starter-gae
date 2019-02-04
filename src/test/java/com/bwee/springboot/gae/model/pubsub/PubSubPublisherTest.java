@@ -2,8 +2,8 @@ package com.bwee.springboot.gae.model.pubsub;
 
 import com.bwee.springboot.gae.pubsub.PubSubPublisher;
 import com.bwee.springboot.gae.pubsub.PublisherFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.pubsub.v1.Publisher;
-import com.google.gson.Gson;
 import com.google.pubsub.v1.PubsubMessage;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
  */
 public class PubSubPublisherTest {
 
-  private Gson gson = new Gson();
+  private ObjectMapper om = new ObjectMapper();
   private PublisherFactory publisherFactory;
   private Publisher publisher;
 
@@ -29,7 +29,7 @@ public class PubSubPublisherTest {
   public void before() {
     publisherFactory = mock(PublisherFactory.class);
     publisher = mock(Publisher.class);
-    pubSubPublisher = new PubSubPublisher(gson, publisherFactory);
+    pubSubPublisher = new PubSubPublisher(om, publisherFactory);
 
     when(publisherFactory.get("test_event")).thenReturn(publisher);
   }

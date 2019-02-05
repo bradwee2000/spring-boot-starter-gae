@@ -104,14 +104,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
    * Save entity to datastore.
    */
   public T save(final T t) {
-    final E entity = updateTimestamps(toEntity(t));
-    final Key<E> result = ofy().save().entity(entity).now();
-
-    // Get generated ID
-    final K id = (K) (result.getName() == null ? (Object) result.getId() : result.getName());
-    entity.setId(id);
-
-    return toModel(entity);
+    return saveAll(Collections.singleton(t)).stream().findFirst().get();
   }
 
   /**
@@ -134,14 +127,19 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
         .map(post -> updateTimestamps(toEntity(post)))
         .collect(Collectors.toList());
 
-    // Save entities in batches and get results
-    final Map<Key<E>, E> result = Lists.partition(entities, MAX_BATCH_SIZE).stream()
-        .map(partition -> ofy().save().entities(partition).now())
-        .flatMap(mapResult -> mapResult.entrySet().stream())
+    // Save async
+    final List<Result<Map<Key<E>, E>>> results = Lists.partition(entities, MAX_BATCH_SIZE).stream()
+        .map(partition -> ofy().save().entities(partition))
+        .collect(Collectors.toList());
+
+    // Wait for all to finish
+    final Map<Key<E>, E> saved = results.stream()
+        .map(r -> r.now())
+        .flatMap(r -> r.entrySet().stream())
         .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
     // Convert to model
-    return result.values().stream().map(e -> toModel(e)).collect(Collectors.toList());
+    return saved.values().stream().map(e -> toModel(e)).collect(Collectors.toList());
   }
 
   /**
@@ -151,7 +149,8 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
     if (id == null) {
       return;
     }
-    ofy().delete().key(key(id)).now();
+
+    deleteAllByKeys(Collections.singletonList(key(id)));
   }
 
   /**
@@ -172,6 +171,36 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
     // Prepare keys
     final List<Key<E>> keys = ids.stream().map(this::key).collect(Collectors.toList());
 
+    return deleteAllByKeys(keys);
+  }
+
+  /**
+   * Delete all entities.
+   */
+  public List<K> deleteAll() {
+    final List<Key<E>> keys = ofy().load().type(clazz).keys().list();
+
+    return deleteAllByKeys(keys);
+  }
+
+  /**
+   * Delete entities by filter.
+   */
+  public List<K> deleteByFilter(final Function<Query<E>, Query<E>> filter) {
+    checkNotNull(filter);
+    List<Key<E>> keys = filter.apply(ofy().load().type(clazz)).keys().list();
+
+    return deleteAllByKeys(keys);
+  }
+
+  /**
+   * Delete entities by Keys.
+   */
+  public List<K> deleteAllByKeys(final List<Key<E>> keys) {
+    if (keys == null || keys.isEmpty()) {
+      return Collections.emptyList();
+    }
+
     // Async delete in batches
     List<Result<Void>> results = Lists.partition(keys, MAX_BATCH_SIZE).stream()
         .map(partition -> ofy().delete().keys(partition))
@@ -180,21 +209,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
     // Wait for all deletes to finish
     results.forEach(result -> result.now());
 
-    return keys.stream()
-        .map(key -> (K) (key.getName() == null ? key.getId() : key.getName()))
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Delete all entities.
-   */
-  public List<K> deleteAll() {
-    final List<Key<E>> allKeys = ofy().load().type(clazz).keys().list();
-    ofy().delete().keys(allKeys).now();
-
-    return allKeys.stream()
-        .map(key -> (K) (key.getName() == null ? key.getId() : key.getName()))
-        .collect(Collectors.toList());
+    return keys.stream().map(this::id).collect(Collectors.toList());
   }
 
   /**
@@ -222,6 +237,13 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
       return Key.create(clazz, (Long) id);
     }
     return Key.create(clazz, (String) id);
+  }
+
+  /**
+   * Convert Key to Id as String or Long.
+   */
+  protected K id(final Key<E> key) {
+    return (K) (key.getName() == null ? key.getId() : key.getName());
   }
 
   protected abstract T toModel(final E entity);

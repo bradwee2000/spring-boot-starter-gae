@@ -2,14 +2,14 @@ package com.bwee.springboot.gae.task;
 
 import com.google.appengine.api.taskqueue.RetryOptions;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,16 +45,20 @@ public class TaskFactory {
     queueFactory.getQueue(task.getQueueName()).add(taskOptions);
   }
 
+  public void submitAll(final Task task, final Task ...more) {
+    submitAll(Lists.asList(task, more));
+  }
+
   public void submitAll(final Collection<Task> tasks) {
-    // Group tasks by queue name
-    final Multimap<String, Task> taskQueueMap = MultimapBuilder.hashKeys().arrayListValues().build();
-    for (final Task task : tasks) {
-      taskQueueMap.put(task.getQueueName(), task);
-    }
+    // Group by queue name
+    final Map<String, List<Task>> map = tasks.stream()
+        .collect(Collectors.groupingBy(task -> task.getQueueName()));
 
     // Submit tasks per queue
-    for (final String queueName : taskQueueMap.keySet()) {
-      final List<TaskOptions> taskOptions = taskQueueMap.get(queueName).stream().map(this::toTaskOptions).collect(Collectors.toList());
+    for (final String queueName : map.keySet()) {
+      final List<TaskOptions> taskOptions = map.get(queueName).stream()
+          .map(this::toTaskOptions)
+          .collect(Collectors.toList());
       queueFactory.getQueue(queueName).add(taskOptions);
     }
   }

@@ -1,6 +1,7 @@
 package com.bwee.springboot.gae.model.service;
 
 import com.bwee.springboot.gae.model.dao.AbstractDao;
+import com.google.common.collect.Lists;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +26,10 @@ public class AbstractService<K, T> {
     return dao.findByIds(ids);
   }
 
+  public List<T> findByIds(final K id, final K ... more) {
+    return findByIds(Lists.asList(id, more));
+  }
+
   public boolean isExists(final K id) {
     return dao.isExists(id);
   }
@@ -38,15 +43,23 @@ public class AbstractService<K, T> {
   }
 
   public T save(final T value) {
-    return dao.save(value);
+    return saveAll(value).stream().findFirst().get();
   }
 
   public List<T> saveAll(final Collection<T> values) {
     return  dao.saveAll(values);
   }
 
+  public List<T> saveAll(final T value, final T ... more) {
+    return saveAll(Lists.asList(value, more));
+  }
+
   public List<K> deleteAll(final Collection<K> ids) {
     return dao.deleteAll(ids);
+  }
+
+  public List<K> deleteAll(final K id, final K ... more) {
+    return deleteAll(Lists.asList(id, more));
   }
 
   public List<K> deleteAll() {
@@ -54,7 +67,6 @@ public class AbstractService<K, T> {
   }
 
   public K delete(final K id) {
-    dao.delete(id);
-    return id;
+    return deleteAll(id).stream().findFirst().get();
   }
 }

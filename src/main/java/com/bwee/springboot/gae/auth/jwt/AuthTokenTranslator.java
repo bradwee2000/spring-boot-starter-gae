@@ -3,6 +3,7 @@ package com.bwee.springboot.gae.auth.jwt;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.bwee.springboot.gae.auth.user.AuthUser;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +41,15 @@ public class AuthTokenTranslator<T extends AuthUser> implements TokenTranslator<
     final String id = decodedJWT.getSubject();
     final String name = decodedJWT.getClaim(NAME).asString();
     final List<String> roles = decodedJWT.getClaim(ROLES).asList(String.class);
-    final T user = (T) createUser(id, name, roles);
+    final T user = createUser(id, name, roles);
     return user;
   }
 
-  public T createUser(final String id, String name, List<String> roles) {
+  public T createUser(final String id, final String name, final String role, final String ... moreRoles) {
+    return createUser(id, name, Lists.asList(role, moreRoles));
+  }
+
+  public T createUser(final String id, final String name, final List<String> roles) {
     return (T) new AuthUser() {
       @Override
       public String getId() {

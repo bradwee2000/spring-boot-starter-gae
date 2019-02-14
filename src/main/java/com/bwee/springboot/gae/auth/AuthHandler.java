@@ -2,10 +2,10 @@ package com.bwee.springboot.gae.auth;
 
 import com.bwee.springboot.gae.auth.exception.AuthenticationException;
 import com.bwee.springboot.gae.auth.exception.AuthorizationException;
+import com.bwee.springboot.gae.auth.jwt.AuthTokenTranslator;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
 import com.bwee.springboot.gae.auth.user.AuthUser;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
-import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.common.collect.Lists;
@@ -17,6 +17,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -38,13 +39,22 @@ public class AuthHandler {
   private final AuthTokenVerifier tokenVerifier;
   private final UserService userService;
   private final AuthUserContext authUserContext;
+  private final AuthTokenTranslator tokenTranslator;
+  private final String adminRole;
+  private final String serviceRole;
 
   public AuthHandler(final AuthTokenVerifier tokenVerifier,
                      final UserService userService,
-                     final AuthUserContext authUserContext) {
+                     final AuthUserContext authUserContext,
+                     final AuthTokenTranslator tokenTranslator,
+                     @Value("${bwee.role.admin:admin}") final String adminRole,
+                     @Value("${bwee.role.service:service}") final String serviceRole) {
     this.tokenVerifier = tokenVerifier;
     this.userService = userService;
     this.authUserContext = authUserContext;
+    this.tokenTranslator = tokenTranslator;
+    this.adminRole = adminRole;
+    this.serviceRole = serviceRole;
   }
 
   @Pointcut("@within(com.bwee.springboot.gae.auth.Secured) || @annotation(Secured)")
@@ -68,7 +78,7 @@ public class AuthHandler {
   private boolean checkIsAdmin() {
     if (userService.isUserLoggedIn() && userService.isUserAdmin()) {
       final User user = userService.getCurrentUser();
-      final AuthUser verifiedUser = new SimpleAuthUser(user.getUserId()).name(user.getNickname()).roles("admin");
+      final AuthUser verifiedUser = tokenTranslator.createUser(user.getUserId(), user.getNickname(), adminRole);
       authUserContext.setAuthUser(verifiedUser);
       return true;
     }
@@ -83,7 +93,8 @@ public class AuthHandler {
 
     if (!StringUtils.isEmpty(request.getHeader(TASK_NAME_HEADER))) {
       final String taskName = request.getHeader(TASK_NAME_HEADER);
-      authUserContext.setAuthUser(new SimpleAuthUser(taskName).roles("task", "service"));
+      final AuthUser authUser = tokenTranslator.createUser(taskName, "", serviceRole);
+      authUserContext.setAuthUser(authUser);
       return true;
     }
     return false;

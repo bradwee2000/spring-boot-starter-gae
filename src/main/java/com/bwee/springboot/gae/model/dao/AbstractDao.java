@@ -96,8 +96,10 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
    */
   public List<T> findByFilter(final Function<Query<E>, Query<E>> filter) {
     checkNotNull(filter);
-    final Query<E> query = ofy().load().type(clazz).limit(100);
-    return filter.apply(query).list().stream().map(e -> toModel(e)).collect(Collectors.toList());
+    final Query<E> query = ofy().load().type(clazz);
+    return filter.apply(query).list().stream()
+        .map(e -> toModel(e))
+        .collect(Collectors.toList());
   }
 
   /**

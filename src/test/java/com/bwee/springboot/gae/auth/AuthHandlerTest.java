@@ -1,6 +1,7 @@
 package com.bwee.springboot.gae.auth;
 
 import com.bwee.springboot.gae.auth.exception.AuthorizationException;
+import com.bwee.springboot.gae.auth.jwt.AuthTokenTranslator;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
 import com.bwee.springboot.gae.auth.user.SimpleAuthUser;
@@ -99,6 +100,11 @@ public class AuthHandlerTest {
     }
 
     @Bean
+    public AuthTokenTranslator authTokenTranslator() {
+      return mock(AuthTokenTranslator.class);
+    }
+
+    @Bean
     public UserService userService() {
       return mock(UserService.class);
     }
@@ -121,8 +127,9 @@ public class AuthHandlerTest {
     @Bean
     public AuthHandler authHandler(final AuthTokenVerifier authTokenVerifier,
                                    final UserService userService,
-                                   final AuthUserContext authUserContext) {
-      return new AuthHandler(authTokenVerifier, userService, authUserContext);
+                                   final AuthUserContext authUserContext,
+                                   final AuthTokenTranslator authTokenTranslator) {
+      return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator, "admin", "service");
     }
   }
 

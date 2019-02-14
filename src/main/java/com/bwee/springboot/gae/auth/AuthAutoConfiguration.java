@@ -56,13 +56,17 @@ public class AuthAutoConfiguration {
   @ConditionalOnMissingBean(AuthHandler.class)
   public AuthHandler authHandler(final AuthTokenVerifier authTokenVerifier,
                                  final UserService userService,
-                                 final AuthUserContext authUserContext) {
-    return new AuthHandler(authTokenVerifier, userService, authUserContext);
+                                 final AuthUserContext authUserContext,
+                                 final AuthTokenTranslator authTokenTranslator,
+                                 @Value("${bwee.role.admin:admin}") final String adminRole,
+                                 @Value("${bwee.role.service:service}") final String serviceRole) {
+    return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator,
+        adminRole, serviceRole);
   }
 
   @Bean
   @ConditionalOnMissingBean(TokenTranslator.class)
-  public TokenTranslator tokenTranslator(final Clock clock) {
+  public AuthTokenTranslator tokenTranslator(final Clock clock) {
     return new AuthTokenTranslator(clock);
   }
 

@@ -17,7 +17,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -47,8 +46,8 @@ public class AuthHandler {
                      final UserService userService,
                      final AuthUserContext authUserContext,
                      final AuthTokenTranslator tokenTranslator,
-                     @Value("${bwee.role.admin:admin}") final String adminRole,
-                     @Value("${bwee.role.service:service}") final String serviceRole) {
+                     final String adminRole,
+                     final String serviceRole) {
     this.tokenVerifier = tokenVerifier;
     this.userService = userService;
     this.authUserContext = authUserContext;

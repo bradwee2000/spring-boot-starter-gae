@@ -32,20 +32,20 @@ public class ConfigService {
    * Get config property.
    */
   public PropertyConverter getProperty(final String key) {
-    final Optional<String> value = configDao.findOne(key)
+    final Optional<String> value = configDao.findById(key)
         .map(config -> config.getValue());
     return new PropertyConverter(gson, value);
   }
 
   public boolean containsKey(final String key) {
-    return configDao.findOne(key).isPresent();
+    return configDao.findById(key).isPresent();
   }
 
   /**
    * Set config property.
    */
   public void setProperty(final String key, final Object value) {
-    final Config config = configDao.findOne(key).orElse(new Config().setId(key));
+    final Config config = configDao.findById(key).orElse(new Config().setId(key));
 
     final String json = value instanceof String ? (String) value : gson.toJson(value);
 

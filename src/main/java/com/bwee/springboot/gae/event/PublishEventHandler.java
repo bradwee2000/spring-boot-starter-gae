@@ -1,6 +1,8 @@
 package com.bwee.springboot.gae.event;
 
 import com.bwee.springboot.gae.pubsub.PubSubPublisher;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -9,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -33,34 +35,42 @@ public class PublishEventHandler {
   @AfterReturning(value = "@annotation(com.bwee.springboot.gae.event.PublishEvent)", returning = "result")
   public void publishEvent(final JoinPoint joinPoint, final Object result) {
     final PublishEvent event = extractEvent(joinPoint);
-    final String topicName = event.value();
-
-    LOG.info("Publishing event to topic {}: {} ", topicName, result);
-
-    final Map<String, String> attributes = extractAttributes(result);
-    final Object payload = extractPayload(result);
+    final String topic = event.value();
+    final Map<String, String> attributes = extractAttributes(joinPoint);
 
     // If it's a collection, publish each item
-    if (event.itemized() && payload instanceof Collection) {
-      ((Collection)result).stream().forEach(item -> publisher.publish(topicName, item, attributes));
+    if (event.itemized() && result instanceof Collection) {
+      publisher.forTopic(topic).attributes(attributes).publishAll((Collection) result).shutdown();
     } else {
-      publisher.publish(topicName, payload, attributes);
+      publisher.forTopic(topic).attributes(attributes).publish(result).shutdown();
     }
   }
 
-  private Map<String,String> extractAttributes(Object result) {
-    if (result instanceof Result) {
-      return ((Result) result).getAttributes();
-    }
+  private Map<String, String> extractAttributes(final JoinPoint joinPoint) {
+    final Map<String, String> attributes = Maps.newHashMap();
+    final MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 
-    return Collections.emptyMap();
-  }
+    final Method method = signature.getMethod();
+    final Annotation[][] annotations = method.getParameterAnnotations();
 
-  private Object extractPayload(Object result) {
-    if (result instanceof Result) {
-      return ((Result) result).getValue();
+    // For each parameter
+    for (int i=0; i< annotations.length; i++) {
+
+      // For each annotation on parameter
+      for (Annotation annotation : annotations[i]) {
+
+        // If annotation is found, add value to attributes
+        if (annotation instanceof PublishAttr) {
+          final String annotatedAttrName = ((PublishAttr) annotation).value();
+          final String attrName = StringUtils.isEmpty(annotatedAttrName) ?
+              method.getParameters()[i].getName() :
+              annotatedAttrName;
+          attributes.put(attrName, joinPoint.getArgs()[i].toString());
+          break;
+        }
+      }
     }
-    return result;
+    return attributes;
   }
 
   /**

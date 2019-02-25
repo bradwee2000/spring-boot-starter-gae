@@ -44,11 +44,11 @@ public class ConfigServiceTest {
     service = new ConfigService(configDao, new Gson());
 
     // Setup configs
-    when(configDao.findOne(anyString())).thenReturn(Optional.empty());
-    when(configDao.findOne("phone")).thenReturn(Optional.of(phone));
-    when(configDao.findOne("email")).thenReturn(Optional.of(email));
-    when(configDao.findOne("address")).thenReturn(Optional.of(address));
-    when(configDao.findOne("blank")).thenReturn(Optional.of(blank));
+    when(configDao.findById(anyString())).thenReturn(Optional.empty());
+    when(configDao.findById("phone")).thenReturn(Optional.of(phone));
+    when(configDao.findById("email")).thenReturn(Optional.of(email));
+    when(configDao.findById("address")).thenReturn(Optional.of(address));
+    when(configDao.findById("blank")).thenReturn(Optional.of(blank));
   }
 
   @Test
@@ -66,8 +66,8 @@ public class ConfigServiceTest {
     final Config isSetupDone = new Config().setId("isSetupDone").setValue("true");
     final Config isComplete = new Config().setId("isComplete").setValue("false");
 
-    when(configDao.findOne("isSetupDone")).thenReturn(Optional.of(isSetupDone));
-    when(configDao.findOne("isComplete")).thenReturn(Optional.of(isComplete));
+    when(configDao.findById("isSetupDone")).thenReturn(Optional.of(isSetupDone));
+    when(configDao.findById("isComplete")).thenReturn(Optional.of(isComplete));
 
     assertThat(service.getProperty("isSetupDone").asBool()).hasValue(TRUE);
     assertThat(service.getProperty("isComplete").asBool()).hasValue(FALSE);
@@ -78,12 +78,12 @@ public class ConfigServiceTest {
   public void testGetPropertyAsDouble_shouldReturnDoubleValue() {
     // Test with whole numbers
     final Config wholeNum = new Config().setId("wholeNum").setValue("12345");
-    when(configDao.findOne("wholeNum")).thenReturn(Optional.of(wholeNum));
+    when(configDao.findById("wholeNum")).thenReturn(Optional.of(wholeNum));
     assertThat(service.getProperty("wholeNum").asDouble()).hasValue(12345d);
 
     // Test with decimals
     final Config decimal = new Config().setId("decimal").setValue("983.23315");
-    when(configDao.findOne("decimal")).thenReturn(Optional.of(decimal));
+    when(configDao.findById("decimal")).thenReturn(Optional.of(decimal));
     assertThat(service.getProperty("decimal").asDouble()).hasValue(983.23315);
 
     // Test with empty

@@ -12,20 +12,14 @@ import org.springframework.context.annotation.Configuration;
 public class PubSubAutoConfiguration {
 
   @Bean
-  @ConditionalOnMissingBean(PublisherFactory.class)
-  public PublisherFactory publisherFactory() {
-    return new PublisherFactory();
-  }
-
-  @Bean
   @ConditionalOnMissingBean(PubSubPublisher.class)
-  public PubSubPublisher pubSubPublisher(final ObjectMapper om, final PublisherFactory publisherFactory) {
-    return new PubSubPublisher(om, publisherFactory);
+  public PubSubPublisher pubSubPublisher(final ObjectMapper om) {
+    return new PubSubPublisher(om);
   }
 
   @Bean
   @ConditionalOnMissingBean(ObjectMapper.class)
-  public ObjectMapper objectMapper() {
+  public ObjectMapper pubsubObjectMapper() {
     return new ObjectMapper();
   }
 }

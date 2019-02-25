@@ -25,7 +25,7 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 /**
  * @author bradwee2000@gmail.com
  */
-public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
+public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> implements Dao<K, T, E> {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractDao.class);
   private static final int MAX_BATCH_SIZE = 500;
   private final Clock clock;
@@ -39,20 +39,23 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Returns entity given its id.
    */
-  public Optional<T> findOne(final K id) {
+  @Override
+  public Optional<T> findById(final K id) {
     if (id == null) {
       return Optional.empty();
     }
     return Optional.ofNullable(ofy().load().key(key(id)).now()).map(e -> toModel(e));
   }
 
+  @Override
   public boolean isExists(final K id) {
-    return findOne(id).isPresent();
+    return findById(id).isPresent();
   }
 
   /**
    * Returns collection of entities given their ids.
    */
+  @Override
   public List<T> findByIds(final K id, final K ... more) {
     return findByIds(Lists.asList(id, more));
   }
@@ -60,6 +63,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Returns collection of entities given their ids.
    */
+  @Override
   public List<T> findByIds(final Collection<K> ids) {
     if (ids == null || ids.isEmpty()) {
       return Collections.emptyList();
@@ -78,6 +82,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Find all entities.
    */
+  @Override
   public List<T> findAll() {
     final List<E> entities = ofy().load().type(clazz).list();
     return entities.stream().map(e -> toModel(e)).collect(Collectors.toList());
@@ -86,6 +91,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Find all entities with limit.
    */
+  @Override
   public List<T> findAllByPage(final int offset, final int limit) {
     final List<E> entities = ofy().load().type(clazz).offset(offset).limit(limit).list();
     return entities.stream().map(e -> toModel(e)).collect(Collectors.toList());
@@ -94,6 +100,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Find all entities filtered by a function.
    */
+  @Override
   public List<T> findByFilter(final Function<Query<E>, Query<E>> filter) {
     checkNotNull(filter);
     final Query<E> query = ofy().load().type(clazz);
@@ -105,6 +112,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Save entity to datastore.
    */
+  @Override
   public T save(final T t) {
     return saveAll(Collections.singleton(t)).stream().findFirst().get();
   }
@@ -112,6 +120,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Save entities to datastore.
    */
+  @Override
   public List<T> saveAll(final T post, final T ... more) {
     return saveAll(Lists.asList(post, more));
   }
@@ -119,6 +128,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Save collection of entities to datastore.
    */
+  @Override
   public List<T> saveAll(final Collection<T> models) {
     if (models == null || models.isEmpty()) {
       return Collections.emptyList();
@@ -147,6 +157,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Delete entity from datastore.
    */
+  @Override
   public void delete(final K id) {
     if (id == null) {
       return;
@@ -158,6 +169,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Delete entities from datastore.
    */
+  @Override
   public List<K> deleteAll(final K id, final K ... more) {
     return deleteAll(Lists.asList(id, more));
   }
@@ -165,6 +177,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Delete all entities in given IDs.
    */
+  @Override
   public List<K> deleteAll(final Collection<K> ids) {
     if (ids == null || ids.isEmpty()) {
       return Collections.emptyList();
@@ -179,6 +192,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Delete all entities.
    */
+  @Override
   public List<K> deleteAll() {
     final List<Key<E>> keys = ofy().load().type(clazz).keys().list();
 
@@ -188,6 +202,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Delete entities by filter.
    */
+  @Override
   public List<K> deleteByFilter(final Function<Query<E>, Query<E>> filter) {
     checkNotNull(filter);
     List<Key<E>> keys = filter.apply(ofy().load().type(clazz)).keys().list();
@@ -198,6 +213,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> {
   /**
    * Delete entities by Keys.
    */
+  @Override
   public List<K> deleteAllByKeys(final List<Key<E>> keys) {
     if (keys == null || keys.isEmpty()) {
       return Collections.emptyList();

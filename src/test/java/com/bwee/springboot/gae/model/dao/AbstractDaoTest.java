@@ -21,7 +21,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static com.bwee.springboot.gae.model.dao.DatastoreTest.registerEntityClasses;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -54,7 +53,7 @@ public class AbstractDaoTest extends DatastoreTest {
   @Test
   public void testSaveAndFind_shouldSaveToDbAndFindEqualObject() {
     final DummyPojo savedPojo = dao.save(dummyPojo1);
-    assertThat(dao.findOne(savedPojo.id)).hasValue(savedPojo);
+    assertThat(dao.findById(savedPojo.id)).hasValue(savedPojo);
   }
 
   @Test
@@ -93,8 +92,8 @@ public class AbstractDaoTest extends DatastoreTest {
 
   @Test
   public void testFindOneWithUnknownId_shouldReturnEmpty() {
-    assertThat(dao.findOne(1l)).isEmpty();
-    assertThat(dao.findOne(2l)).isEmpty();
+    assertThat(dao.findById(1l)).isEmpty();
+    assertThat(dao.findById(2l)).isEmpty();
   }
 
   @Test
@@ -137,8 +136,8 @@ public class AbstractDaoTest extends DatastoreTest {
     dao.delete(2l);
 
     // Verify only one is deleted
-    assertThat(dao.findOne(1l)).isNotEmpty();
-    assertThat(dao.findOne(2l)).isEmpty();
+    assertThat(dao.findById(1l)).isNotEmpty();
+    assertThat(dao.findById(2l)).isEmpty();
 
     // Delete another
     dao.delete(1l);

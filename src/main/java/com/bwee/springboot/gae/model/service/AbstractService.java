@@ -20,7 +20,7 @@ public class AbstractService<K, T> implements ModelService<K, T>{
 
   @Override
   public Optional<T> findById(final K id) {
-    return dao.findOne(id);
+    return dao.findById(id);
   }
 
   @Override

@@ -47,7 +47,7 @@ public class TopicPublisher {
         .build();
 
     // Publish
-    futures.add(publisher.publish(message));
+//    futures.add(publisher.publish(message));
 
     return this;
   }
@@ -80,6 +80,7 @@ public class TopicPublisher {
     }
   }
 
+  //TODO not needed?
   public void shutdown() {
     try {
       final List<String> messageIds = futures.isEmpty() ?

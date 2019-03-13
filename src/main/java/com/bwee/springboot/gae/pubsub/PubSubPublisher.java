@@ -28,7 +28,7 @@ public class PubSubPublisher {
    * Create Google PubSub Publisher for topic name.
    */
   public TopicPublisher forTopic(final String topic) {
-    if (publishers.containsKey(topic)) {
+    if (!publishers.containsKey(topic)) {
       publishers.put(topic, createPublisherForTopic(topic));
     }
 

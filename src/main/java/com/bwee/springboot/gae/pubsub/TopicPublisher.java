@@ -46,6 +46,8 @@ public class TopicPublisher {
         .setData(ByteString.copyFromUtf8(jsonPayload))
         .build();
 
+    publisher.publish(message);
+
     // Publish
 //    futures.add(publisher.publish(message));
 

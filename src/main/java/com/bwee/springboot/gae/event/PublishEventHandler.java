@@ -40,9 +40,9 @@ public class PublishEventHandler {
 
     // If it's a collection, publish each item
     if (event.itemized() && result instanceof Collection) {
-      publisher.forTopic(topic).attributes(attributes).publishAll((Collection) result).shutdown();
+      publisher.forTopic(topic).attributes(attributes).publishAll((Collection) result);
     } else {
-      publisher.forTopic(topic).attributes(attributes).publish(result).shutdown();
+      publisher.forTopic(topic).attributes(attributes).publish(result);
     }
   }
 

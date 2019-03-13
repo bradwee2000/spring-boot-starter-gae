@@ -62,7 +62,6 @@ public class PublishEventHandlerTest {
     service.saveAndReturnList();
     verify(pubSubPublisher).forTopic("entity-saved");
     verify(topicPublisher).publish(Lists.newArrayList("A", "B", "C"));
-    verify(topicPublisher).shutdown();
   }
 
   @Test
@@ -70,7 +69,6 @@ public class PublishEventHandlerTest {
     service.saveAndReturnItemizedList();
     verify(pubSubPublisher).forTopic("entity-saved");
     verify(topicPublisher).publishAll(Lists.newArrayList("A", "B", "C"));
-    verify(topicPublisher).shutdown();
   }
 
   @Test
@@ -78,7 +76,6 @@ public class PublishEventHandlerTest {
     service.saveAndReturnString();
     verify(pubSubPublisher).forTopic("entity-saved");
     verify(topicPublisher).publish("Success");
-    verify(topicPublisher).shutdown();
   }
 
   @Test

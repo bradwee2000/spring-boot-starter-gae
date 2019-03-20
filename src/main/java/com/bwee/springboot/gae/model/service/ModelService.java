@@ -7,7 +7,7 @@ import java.util.Optional;
 /**
  * @author bradwee2000@gmail.com
  */
-interface ModelService<K, T> {
+public interface ModelService<K, T> {
 
   Optional<T> findById(final K id);
 

@@ -65,13 +65,15 @@ public class AuthHandler {
     if (checkIsService()) {
       return;
     }
-
+LOG.info("NOT SERBIS");
     // Allow GAE admins to proceed
     if (checkIsAdmin()) {
       return;
     }
-
+    LOG.info("NOT ADMIN");
     verifyAuthToken(joinPoint);
+
+//    LOG.info("Requested by user.id={}", authUserContext.getAuthUser().getId());
   }
 
   private boolean checkIsAdmin() {

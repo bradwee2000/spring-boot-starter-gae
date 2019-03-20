@@ -2,6 +2,7 @@ package com.bwee.springboot.gae.objectify;
 
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.googlecode.objectify.ObjectifyFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,5 +31,11 @@ public class ObjectifyAutoConfiguration {
   @ConditionalOnMissingBean(name = "ofyMemcacheService")
   public MemcacheService ofyMemcacheService() {
     return MemcacheServiceFactory.getMemcacheService("objectify");
+  }
+
+  @Bean
+  @ConditionalOnMissingBean(ObjectifyFilter.class)
+  public ObjectifyFilter ObjectifyFilter() {
+    return new ObjectifyFilter();
   }
 }

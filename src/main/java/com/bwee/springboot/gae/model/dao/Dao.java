@@ -11,7 +11,7 @@ import java.util.function.Function;
 /**
  * @author bradwee2000@gmail.com
  */
-interface Dao<K, T, E> {
+public interface Dao<K, T, E> {
 
   Optional<T> findById(final K id);
 

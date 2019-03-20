@@ -50,7 +50,7 @@ public class AbstractService<K, T> implements ModelService<K, T>{
 
   @Override
   public T save(final T value) {
-    return saveAll(value).stream().findFirst().get();
+    return dao.save(value);
   }
 
   @Override
@@ -80,6 +80,7 @@ public class AbstractService<K, T> implements ModelService<K, T>{
 
   @Override
   public K delete(final K id) {
-    return deleteAll(id).stream().findFirst().get();
+    dao.delete(id);
+    return id;
   }
 }

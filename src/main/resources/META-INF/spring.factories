@@ -4,6 +4,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.bwee.springboot.gae.model.ConfigAutoConfiguration,\
   com.bwee.springboot.gae.event.EventAutoConfiguration,\
   com.bwee.springboot.gae.image.ImageAutoConfiguration,\
+  com.bwee.springboot.gae.namespace.NamespaceAutoConfiguration,\
   com.bwee.springboot.gae.objectify.ObjectifyAutoConfiguration,\
   com.bwee.springboot.gae.pubsub.PubSubAutoConfiguration,\
   com.bwee.springboot.gae.storage.StorageAutoConfiguration,\

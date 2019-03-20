@@ -35,9 +35,9 @@ public class PubSubPublisher {
     return new TopicPublisher(publishers.get(topic), om);
   }
 
-  private Publisher createPublisherForTopic(final String topic) {
+  private Publisher createPublisherForTopic(final String topicName) {
     try {
-      return Publisher.newBuilder(topic).build();
+      return Publisher.newBuilder(topicName).build();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

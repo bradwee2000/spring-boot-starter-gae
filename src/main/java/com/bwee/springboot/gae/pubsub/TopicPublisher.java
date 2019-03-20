@@ -3,6 +3,7 @@ package com.bwee.springboot.gae.pubsub;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.core.ApiFuture;
+import com.google.api.core.ApiFutureCallback;
 import com.google.api.core.ApiFutures;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.common.collect.ImmutableMap;
@@ -16,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author bradwee2000@gmail.com
@@ -46,10 +48,32 @@ public class TopicPublisher {
         .setData(ByteString.copyFromUtf8(jsonPayload))
         .build();
 
-    publisher.publish(message);
+    LOG.debug("Publishing message: {}", message);
 
-    // Publish
-//    futures.add(publisher.publish(message));
+    final ApiFuture<String> future = publisher.publish(message);
+
+    ApiFutures.addCallback(future, new ApiFutureCallback<String>() {
+      @Override
+      public void onFailure(Throwable t) {
+        LOG.error("NAKO FAIL NAMAN E", t);
+        System.out.println("NAKO FAIL NAMAN E: " + t.getMessage());
+      }
+
+      @Override
+      public void onSuccess(String result) {
+        LOG.info("SUCCESS NA ANG MENSAHE: {}", result);
+        System.out.println("SUCCESS: " + result);
+      }
+    });
+
+    LOG.info("WAIT FOR IT");
+    try {
+      LOG.info("MESSAGE: {}", future.get());
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    }
 
     return this;
   }

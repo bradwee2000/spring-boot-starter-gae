@@ -28,12 +28,6 @@ public class IdentifiableValueAdapter implements IdentifiableValue {
   }
 
   @Override
-  public IdentifiableValue withValue(Object o) {
-    this.value = () -> o;
-    return this;
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;

@@ -1,5 +1,9 @@
 package com.bwee.springboot.gae.model.dao;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.testing.LocalDatastoreHelper;
 import com.google.common.collect.Lists;
@@ -40,6 +44,7 @@ public abstract class DatastoreTest {
   public static void startDatastore() throws IOException, InterruptedException {
     helper.start();
     final Datastore datastore = helper.getOptions().toBuilder().setNamespace(NAMESPACE).build().getService();
+
     ObjectifyService.init(new ObjectifyFactory(datastore));
   }
 

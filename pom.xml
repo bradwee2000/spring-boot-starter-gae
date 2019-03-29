@@ -38,10 +38,6 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -53,16 +49,11 @@
             <artifactId>spring-security-core</artifactId>
         </dependency>
 
+
         <!--Google-->
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-            <version>1</version>
         </dependency>
 
         <dependency>
@@ -81,15 +72,11 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-
+        <!--Later versions (up to 1.66.0) don't send to pubsub-->
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-pubsub</artifactId>
-            <version>1.60.0</version>
+            <version>1.35.0</version>
         </dependency>
 
         <dependency>
@@ -110,12 +97,6 @@
             <artifactId>jul-to-slf4j</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!--SLF4J to JUL-->
-        <!--<dependency>-->
-            <!--<groupId>org.slf4j</groupId>-->
-            <!--<artifactId>slf4j-jdk14</artifactId>-->
-        <!--</dependency>-->
 
         <dependency>
             <groupId>com.google.firebase</groupId>
@@ -147,6 +128,15 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
         </dependency>
 
         <!-- Test Dependencies -->

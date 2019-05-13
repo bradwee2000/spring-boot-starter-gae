@@ -19,6 +19,9 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import javax.inject.Provider;
 import java.time.Clock;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author bradwee2000@gmail.com
@@ -58,9 +61,10 @@ public class AuthAutoConfiguration {
                                  final UserService userService,
                                  final AuthUserContext authUserContext,
                                  final AuthTokenTranslator authTokenTranslator,
+                                 final PermissionProvider permissionProvider,
                                  @Value("${bwee.role.admin:admin}") final String adminRole,
                                  @Value("${bwee.role.service:service}") final String serviceRole) {
-    return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator,
+    return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator, permissionProvider,
         adminRole, serviceRole);
   }
 
@@ -86,6 +90,12 @@ public class AuthAutoConfiguration {
   @ConditionalOnMissingBean(AuthUserContext.class)
   public AuthUserContext authUserContext(final Provider<AuthUserHolder> authUserHolder) {
     return new AuthUserContext(authUserHolder);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean(PermissionProvider.class)
+  public PermissionProvider permissionProvider() {
+    return roles -> Collections.emptyList();
   }
 
   @Bean

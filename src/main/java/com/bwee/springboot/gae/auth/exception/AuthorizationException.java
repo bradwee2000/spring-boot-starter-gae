@@ -27,10 +27,13 @@ public class AuthorizationException extends RuntimeException {
     return new AuthorizationException(EXPIRED_TOKEN, "Token: " + token);
   }
 
-  public static AuthorizationException missingRoles(final AuthUser authUser,
-                                                    final Collection<String> requiredRoles) {
-    final String msg = "User " + authUser + " has insufficient roles. Required: "
-        + Joiner.on(", ").join(requiredRoles);
+  public static AuthorizationException missingRoles(final AuthUser authUser) {
+    final String msg = "User " + authUser + " has insufficient privileges";
+    return new AuthorizationException(INSUFFICIENT_RIGHTS, msg);
+  }
+
+  public static AuthorizationException missingPermissions(final AuthUser authUser) {
+    final String msg = "User " + authUser + " has insufficient privileges.";
     return new AuthorizationException(INSUFFICIENT_RIGHTS, msg);
   }
 

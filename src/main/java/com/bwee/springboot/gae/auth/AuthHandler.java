@@ -39,6 +39,7 @@ public class AuthHandler {
   private final UserService userService;
   private final AuthUserContext authUserContext;
   private final AuthTokenTranslator tokenTranslator;
+  private final PermissionProvider permissionProvider;
   private final String adminRole;
   private final String serviceRole;
 
@@ -46,12 +47,14 @@ public class AuthHandler {
                      final UserService userService,
                      final AuthUserContext authUserContext,
                      final AuthTokenTranslator tokenTranslator,
+                     final PermissionProvider permissionProvider,
                      final String adminRole,
                      final String serviceRole) {
     this.tokenVerifier = tokenVerifier;
     this.userService = userService;
     this.authUserContext = authUserContext;
     this.tokenTranslator = tokenTranslator;
+    this.permissionProvider = permissionProvider;
     this.adminRole = adminRole;
     this.serviceRole = serviceRole;
   }
@@ -103,14 +106,14 @@ public class AuthHandler {
     return false;
   }
 
+  /**
+   * Verify that request header contains valid Auth Token.
+   */
   private void verifyAuthToken(final JoinPoint joinPoint) {
     final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
         .currentRequestAttributes()).getRequest();
 
     checkNotNull(request, "Can only be used in an Http request context.");
-
-    final Secured secured = extractAnnotation(joinPoint);
-    final List<String> expectedRoles = Lists.newArrayList(secured.value());
 
     final String token = StringUtils.replace(request.getHeader(AUTHORIZATION_HEADER), "Bearer ", "");
 
@@ -121,12 +124,41 @@ public class AuthHandler {
     // Must have valid token
     final AuthUser user = tokenVerifier.verifyToken(token);
 
-    // Must have all required roles
-    if (!user.getRoles().containsAll(expectedRoles)) {
-      throw AuthorizationException.missingRoles(user, expectedRoles);
-    }
+    // Verify roles and permissions
+    final Secured secured = extractAnnotation(joinPoint);
+    verifyRoles(secured, user);
+    verifyPermissions(secured, user);
 
     authUserContext.setAuthUser(user);
+  }
+
+  /**
+   * Check that user has all the required roles
+   */
+  private void verifyRoles(final Secured secured, final AuthUser user) {
+    final List<String> expectedRoles = Lists.newArrayList(secured.value());
+
+    // Must have all required roles
+    if (!user.getRoles().containsAll(expectedRoles)) {
+      throw AuthorizationException.missingRoles(user);
+    }
+  }
+
+  /**
+   * Check that user has all the required permissions
+   */
+  private void verifyPermissions(final Secured secured, final AuthUser user) {
+    final List<String> expectedPermissions = Lists.newArrayList(secured.permissions());
+
+    if (expectedPermissions.isEmpty()) {
+      return;
+    }
+
+    final List<String> userPermissions = permissionProvider.getPermissions(user.getRoles());
+
+    if (!userPermissions.containsAll(expectedPermissions)) {
+      throw AuthorizationException.missingPermissions(user);
+    }
   }
 
   /**

@@ -24,11 +24,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +58,9 @@ public class AuthHandlerTest {
 
   @Autowired
   private AuthTokenVerifier authTokenVerifier;
+
+  @Autowired
+  private PermissionProvider permissionProvider;
 
   @Before
   public void before() {
@@ -91,6 +98,21 @@ public class AuthHandlerTest {
     mvc.perform(get("/method/unsecured")).andExpect(status().isOk());
   }
 
+  @Test
+  public void testPermissions_shouldCheckUserHasPermissions() throws Exception {
+    // test with all permissions available
+    when(permissionProvider.getPermissions(any(Collection.class))).thenReturn(Arrays.asList("Read", "Write"));
+    mvc.perform(get("/method/permissions-required")
+            .header("Authorization", "Bearer " + VALID_AUTH_TOKEN))
+            .andExpect(status().isOk());
+
+    // test with 1 missing permission
+    when(permissionProvider.getPermissions(any(Collection.class))).thenReturn(Arrays.asList("Read"));
+    mvc.perform(get("/method/permissions-required")
+            .header("Authorization", "Bearer " + VALID_AUTH_TOKEN))
+            .andExpect(status().isForbidden());
+  }
+
   @Configuration
   @EnableAspectJAutoProxy
   public static class Ctx {
@@ -125,11 +147,18 @@ public class AuthHandlerTest {
     }
 
     @Bean
+    public PermissionProvider permissionProvider() {
+      return mock(PermissionProvider.class);
+    }
+
+    @Bean
     public AuthHandler authHandler(final AuthTokenVerifier authTokenVerifier,
                                    final UserService userService,
                                    final AuthUserContext authUserContext,
-                                   final AuthTokenTranslator authTokenTranslator) {
-      return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator, "admin", "service");
+                                   final AuthTokenTranslator authTokenTranslator,
+                                   final PermissionProvider permissionProvider) {
+      return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator, permissionProvider,
+              "admin", "service");
     }
   }
 
@@ -157,6 +186,12 @@ public class AuthHandlerTest {
     @Secured("ADMIN")
     @GetMapping
     public ResponseEntity get() {
+      return ResponseEntity.ok("Success");
+    }
+
+    @Secured(permissions = {"Read", "Write"})
+    @GetMapping("/permissions-required")
+    public ResponseEntity getPermissionRequired() {
       return ResponseEntity.ok("Success");
     }
 

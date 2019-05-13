@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public interface PermissionProvider {
+public interface PermissionService {
 
     List<String> getPermissions(final Collection<String> roles);
 

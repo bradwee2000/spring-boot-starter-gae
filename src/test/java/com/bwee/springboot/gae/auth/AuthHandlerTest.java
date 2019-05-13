@@ -60,7 +60,7 @@ public class AuthHandlerTest {
   private AuthTokenVerifier authTokenVerifier;
 
   @Autowired
-  private PermissionProvider permissionProvider;
+  private PermissionService permissionService;
 
   @Before
   public void before() {
@@ -101,13 +101,13 @@ public class AuthHandlerTest {
   @Test
   public void testPermissions_shouldCheckUserHasPermissions() throws Exception {
     // test with all permissions available
-    when(permissionProvider.getPermissions(any(Collection.class))).thenReturn(Arrays.asList("Read", "Write"));
+    when(permissionService.getPermissions(any(Collection.class))).thenReturn(Arrays.asList("Read", "Write"));
     mvc.perform(get("/method/permissions-required")
             .header("Authorization", "Bearer " + VALID_AUTH_TOKEN))
             .andExpect(status().isOk());
 
     // test with 1 missing permission
-    when(permissionProvider.getPermissions(any(Collection.class))).thenReturn(Arrays.asList("Read"));
+    when(permissionService.getPermissions(any(Collection.class))).thenReturn(Arrays.asList("Read"));
     mvc.perform(get("/method/permissions-required")
             .header("Authorization", "Bearer " + VALID_AUTH_TOKEN))
             .andExpect(status().isForbidden());
@@ -147,8 +147,8 @@ public class AuthHandlerTest {
     }
 
     @Bean
-    public PermissionProvider permissionProvider() {
-      return mock(PermissionProvider.class);
+    public PermissionService permissionProvider() {
+      return mock(PermissionService.class);
     }
 
     @Bean
@@ -156,8 +156,8 @@ public class AuthHandlerTest {
                                    final UserService userService,
                                    final AuthUserContext authUserContext,
                                    final AuthTokenTranslator authTokenTranslator,
-                                   final PermissionProvider permissionProvider) {
-      return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator, permissionProvider,
+                                   final PermissionService permissionService) {
+      return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator, permissionService,
               "admin", "service");
     }
   }

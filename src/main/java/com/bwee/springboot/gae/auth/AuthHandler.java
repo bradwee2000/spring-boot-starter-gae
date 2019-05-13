@@ -39,7 +39,7 @@ public class AuthHandler {
   private final UserService userService;
   private final AuthUserContext authUserContext;
   private final AuthTokenTranslator tokenTranslator;
-  private final PermissionProvider permissionProvider;
+  private final PermissionService permissionService;
   private final String adminRole;
   private final String serviceRole;
 
@@ -47,14 +47,14 @@ public class AuthHandler {
                      final UserService userService,
                      final AuthUserContext authUserContext,
                      final AuthTokenTranslator tokenTranslator,
-                     final PermissionProvider permissionProvider,
+                     final PermissionService permissionService,
                      final String adminRole,
                      final String serviceRole) {
     this.tokenVerifier = tokenVerifier;
     this.userService = userService;
     this.authUserContext = authUserContext;
     this.tokenTranslator = tokenTranslator;
-    this.permissionProvider = permissionProvider;
+    this.permissionService = permissionService;
     this.adminRole = adminRole;
     this.serviceRole = serviceRole;
   }
@@ -154,7 +154,7 @@ public class AuthHandler {
       return;
     }
 
-    final List<String> userPermissions = permissionProvider.getPermissions(user.getRoles());
+    final List<String> userPermissions = permissionService.getPermissions(user.getRoles());
 
     if (!userPermissions.containsAll(expectedPermissions)) {
       throw AuthorizationException.missingPermissions(user);

@@ -18,5 +18,14 @@ public @interface PublishEvent {
   /**
    * If true, and if data is a collection, each item in the collection is published as an event.
    */
+  @Deprecated
   boolean itemized() default false;
+
+  WrapType wrapType() default WrapType.none;
+
+  enum WrapType {
+    none, // Do no wrapping
+    collection, // Wrap in collection if payload is not a collection
+    itemized // If payload is a collection, publish each item as a separate event
+  }
 }

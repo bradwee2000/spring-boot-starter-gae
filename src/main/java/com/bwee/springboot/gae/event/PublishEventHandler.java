@@ -1,6 +1,7 @@
 package com.bwee.springboot.gae.event;
 
 import com.bwee.springboot.gae.pubsub.PubSubPublisher;
+import com.bwee.springboot.gae.pubsub.TopicPublisher;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 import org.aspectj.lang.JoinPoint;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -38,11 +40,15 @@ public class PublishEventHandler {
     final String topic = event.value();
     final Map<String, String> attributes = extractAttributes(joinPoint);
 
+    final TopicPublisher topicPublisher = publisher.forTopic(topic).attributes(attributes);
+
     // If it's a collection, publish each item
-    if (event.itemized() && result instanceof Collection) {
-      publisher.forTopic(topic).attributes(attributes).publishAll((Collection) result);
+    if ((event.wrapType() == PublishEvent.WrapType.itemized || event.itemized()) && result instanceof Collection) {
+      topicPublisher.publishAll((Collection) result);
+    } else if (event.wrapType() == PublishEvent.WrapType.collection && !(result instanceof Collection)) {
+      topicPublisher.publish(Collections.singleton(result));
     } else {
-      publisher.forTopic(topic).attributes(attributes).publish(result);
+      topicPublisher.publish(result);
     }
   }
 

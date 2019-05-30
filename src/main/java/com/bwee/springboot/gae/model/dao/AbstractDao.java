@@ -5,6 +5,7 @@ import com.bwee.springboot.gae.model.entity.TimestampedEntity;
 import com.google.common.collect.Lists;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Result;
+import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -136,7 +138,7 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> implements 
 
     // Convert to entities
     final List<E> entities = models.stream()
-        .map(post -> updateTimestamps(toEntity(post)))
+        .map(model -> updateTimestamps(toEntity(model)))
         .collect(Collectors.toList());
 
     // Save async
@@ -228,6 +230,10 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> implements 
     results.forEach(result -> result.now());
 
     return keys.stream().map(this::id).collect(Collectors.toList());
+  }
+
+  public <R> R transact(final Supplier<R> work) {
+    return ofy().transact(() -> work.get());
   }
 
   /**

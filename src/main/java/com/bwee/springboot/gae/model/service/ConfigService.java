@@ -1,6 +1,7 @@
 package com.bwee.springboot.gae.model.service;
 
 import com.bwee.springboot.gae.model.dao.ConfigDao;
+import com.bwee.springboot.gae.model.pojo.AtomicLong;
 import com.bwee.springboot.gae.model.pojo.Config;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
@@ -52,6 +53,25 @@ public class ConfigService {
     config.setValue(json);
 
     configDao.save(config);
+  }
+
+  public AtomicLong getAtomicLong(final String key) {
+    return new AtomicLong(
+            () -> getAtomicLongValue(key),
+            (v) -> setProperty(key, v),
+            (i) -> getAtomicLongValueAndIncrement(key, i));
+  }
+
+  private Long getAtomicLongValue(final String key) {
+    return getProperty(key).asLong().orElse(0l);
+  }
+
+  private Long getAtomicLongValueAndIncrement(final String key, final long increment) {
+    return configDao.transact(() -> {
+      final Long value = getProperty(key).asLong().orElse(0l);
+      setProperty(key, value + increment);
+      return value;
+    });
   }
 
   /**

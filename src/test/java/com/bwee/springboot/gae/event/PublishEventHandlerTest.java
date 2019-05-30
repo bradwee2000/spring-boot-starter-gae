@@ -17,9 +17,12 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static com.bwee.springboot.gae.event.PublishEvent.WrapType.collection;
+import static com.bwee.springboot.gae.event.PublishEvent.WrapType.itemized;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_SELF;
@@ -65,13 +68,6 @@ public class PublishEventHandlerTest {
   }
 
   @Test
-  public void testReturnListWithItemized_shouldPublishEventForEachItemInList() {
-    service.saveAndReturnItemizedList();
-    verify(pubSubPublisher).forTopic("entity-saved");
-    verify(topicPublisher).publishAll(Lists.newArrayList("A", "B", "C"));
-  }
-
-  @Test
   public void testReturnString_shouldPublishEvent() {
     service.saveAndReturnString();
     verify(pubSubPublisher).forTopic("entity-saved");
@@ -104,6 +100,29 @@ public class PublishEventHandlerTest {
     assertThat(captor.getValue().get("email")).isEqualTo("test@email.com");
   }
 
+  @Test
+  public void testReturnStringWrapAsCollection_shouldWrapPayloadInCollection() {
+    service.saveAndReturnStringWrapAsCollection();
+
+    verify(pubSubPublisher).forTopic("entity-saved");
+    verify(topicPublisher).publish(Collections.singleton("Success"));
+  }
+
+  @Test
+  public void testReturnListWrapAsCollection_shouldPublishAsIs() {
+    service.saveAndReturnListWrapAsCollection();
+
+    verify(pubSubPublisher).forTopic("entity-saved");
+    verify(topicPublisher).publish(Lists.newArrayList("A", "B", "C"));
+  }
+
+  @Test
+  public void testReturnStringWrapAsItemized_shouldPublishEventForString() {
+    service.saveAndReturnStringWrapAsItemized();
+    verify(pubSubPublisher).forTopic("entity-saved");
+    verify(topicPublisher).publish("Success");
+  }
+
   /**
    * Test context
    */
@@ -128,11 +147,6 @@ public class PublishEventHandlerTest {
       return Lists.newArrayList("A", "B", "C");
     }
 
-    @PublishEvent(value = "entity-saved", itemized = true)
-    public List<String> saveAndReturnItemizedList() {
-      return Lists.newArrayList("A", "B", "C");
-    }
-
     @PublishEvent("entity-saved")
     public String saveAndReturnString() {
       return "Success";
@@ -150,6 +164,26 @@ public class PublishEventHandlerTest {
                                      @PublishAttr int age,
                                      @PublishAttr("email") String emailAdd,
                                      String city) {
+      return "Success";
+    }
+
+    @PublishEvent(value = "entity-saved", wrapType = collection)
+    public String saveAndReturnStringWrapAsCollection() {
+      return "Success";
+    }
+
+    @PublishEvent(value = "entity-saved", wrapType = collection)
+    public List<String> saveAndReturnListWrapAsCollection() {
+      return Lists.newArrayList("A", "B", "C");
+    }
+
+    @PublishEvent(value = "entity-saved", wrapType = itemized)
+    public List<String> saveAndReturnListWrapAsItemized() {
+      return Lists.newArrayList("A", "B", "C");
+    }
+
+    @PublishEvent(value = "entity-saved", wrapType = itemized)
+    public String saveAndReturnStringWrapAsItemized() {
       return "Success";
     }
   }

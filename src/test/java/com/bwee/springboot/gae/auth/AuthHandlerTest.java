@@ -32,6 +32,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -42,8 +43,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = { AuthHandlerTest.Ctx.class, })
-@WebMvcTest(value = {AuthHandlerTest.ClassSecuredController.class,
-    AuthHandlerTest.MethodSecuredController.class},
+@WebMvcTest(value = {
+        AuthHandlerTest.ClassSecuredController.class,
+        AuthHandlerTest.MethodSecuredController.class,
+        AuthHandlerTest.ClassAndMethodSecuredController.class
+},
     secure = false)
 public class AuthHandlerTest {
   private static final Logger LOG = LoggerFactory.getLogger(AuthHandlerTest.class);
@@ -80,6 +84,7 @@ public class AuthHandlerTest {
   public void testWithInvalidToken_shouldForbidAccess() throws Exception {
     mvc.perform(get("/class/").header("Authorization", "Bearer " + INVALID_AUTH_TOKEN))
         .andExpect(status().isForbidden());
+    verify(authTokenVerifier).verifyToken(INVALID_AUTH_TOKEN);
   }
 
   @Test
@@ -113,6 +118,14 @@ public class AuthHandlerTest {
             .andExpect(status().isForbidden());
   }
 
+  @Test
+  public void testWithClassAndMethodSecured_shouldProcessOnce() throws Exception {
+    mvc.perform(get("/class-and-method-secured")
+            .header("Authorization", INVALID_AUTH_TOKEN))
+            .andExpect(status().isForbidden());
+    verify(authTokenVerifier).verifyToken(INVALID_AUTH_TOKEN);
+  }
+
   @Configuration
   @EnableAspectJAutoProxy
   public static class Ctx {
@@ -144,6 +157,11 @@ public class AuthHandlerTest {
     @Bean
     public MethodSecuredController methodSecuredController() {
       return new MethodSecuredController();
+    }
+
+    @Bean
+    public ClassAndMethodSecuredController classAndMethodSecuredController() {
+      return new ClassAndMethodSecuredController();
     }
 
     @Bean
@@ -199,5 +217,21 @@ public class AuthHandlerTest {
     public ResponseEntity getUnsecured() {
       return ResponseEntity.ok("Success");
     }
+  }
+
+  /**
+   * Class and method secured controller.
+   */
+  @Secured
+  @Controller
+  @RequestMapping(value = "/class-and-method-secured", produces = APPLICATION_JSON_VALUE)
+  public static class ClassAndMethodSecuredController {
+
+    @Secured("ADMIN")
+    @GetMapping
+    public ResponseEntity get() {
+      return ResponseEntity.ok("Success");
+    }
+
   }
 }

@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.namespace;
 
+import com.google.appengine.api.NamespaceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +18,16 @@ import java.io.IOException;
 public class NamespaceFilter implements Filter {
   private static final Logger LOG = LoggerFactory.getLogger(NamespaceFilter.class);
 
+  private final String namespace;
+
+  public NamespaceFilter(String namespace) {
+    this.namespace = namespace;
+  }
+
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    LOG.debug("Setting namespace to " + namespace);
+    NamespaceManager.set(namespace);
     filterChain.doFilter(servletRequest, servletResponse);
   }
 

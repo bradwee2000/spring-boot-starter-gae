@@ -2,6 +2,8 @@ package com.bwee.springboot.gae.objectify;
 
 import com.bwee.springboot.gae.model.entity.ConfigEntity;
 import com.google.appengine.api.memcache.MemcacheService;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.googlecode.objectify.ObjectifyFactory;
@@ -33,24 +35,29 @@ public class ObjectifyFactoryFactory implements FactoryBean<ObjectifyFactory>, I
   private final MemcacheService memcacheService;
   private final List<Class<?>> classes = Lists.newArrayList();
   private final List<String> basePackageList;
+  private final String namespace;
   private ObjectifyFactory objectifyFactory;
 
   public ObjectifyFactoryFactory(ApplicationContext applicationContext,
                                  MemcacheService memcacheService,
-                                 final String basePackages) {
+                                 final String basePackages,
+                                 final String namespace) {
     this.applicationContext = applicationContext;
     this.memcacheService = memcacheService;
     this.basePackageList = Splitter.on(',')
         .trimResults()
         .omitEmptyStrings()
         .splitToList(basePackages + "," + ConfigEntity.class.getPackage().getName());
+    this.namespace = namespace;
   }
 
   @Override
   public void afterPropertiesSet() {
-    LOG.info("Initializing Objectify.");
+    LOG.info("Initializing Objectify. Setting namespace to {}", namespace);
 
-    objectifyFactory = new ObjectifyFactory(new MemcacheServiceAdapter(memcacheService));
+    final Datastore datastore = DatastoreOptions.newBuilder().setNamespace(namespace).build().getService();
+
+    objectifyFactory = new ObjectifyFactory(datastore, new MemcacheServiceAdapter(memcacheService));
 
     if (!basePackageList.isEmpty()) {
       classes.addAll(doScan());

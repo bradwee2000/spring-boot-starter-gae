@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static com.bwee.springboot.gae.event.PublishEvent.WrapType.collection;
 import static com.bwee.springboot.gae.event.PublishEvent.WrapType.itemized;
@@ -123,6 +124,13 @@ public class PublishEventHandlerTest {
     verify(topicPublisher).publish("Success");
   }
 
+  @Test
+  public void testWithPayloadConverter_shouldPublishWithConvertedPayload() {
+    service.saveWithPayloadConverters();
+    verify(pubSubPublisher).forTopic("entity-saved");
+    verify(topicPublisher).publish("S");
+  }
+
   /**
    * Test context
    */
@@ -133,6 +141,11 @@ public class PublishEventHandlerTest {
     @Bean
     public PubSubPublisher pubSubPublisher() {
       return mock(PubSubPublisher.class);
+    }
+
+    @Bean
+    public Function<String, String> firstChar() {
+      return (input) -> "" + input.charAt(0);
     }
   }
 
@@ -164,6 +177,11 @@ public class PublishEventHandlerTest {
                                      @PublishAttr int age,
                                      @PublishAttr("email") String emailAdd,
                                      String city) {
+      return "Success";
+    }
+
+    @PublishEvent(value = "entity-saved", payloadConverterBean = "firstChar")
+    public String saveWithPayloadConverters() {
       return "Success";
     }
 

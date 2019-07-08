@@ -10,6 +10,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
  * @author bradwee2000@gmail.com
@@ -23,8 +25,10 @@ public class ObjectifyAutoConfiguration {
                                                             @Qualifier("ofyMemcacheService")
                                                             final MemcacheService memcacheService,
                                                             @Value("${bwee.objectify.scan.base.packages:}")
-                                                            final String basePackages) {
-    return new ObjectifyFactoryFactory(applicationContext, memcacheService, basePackages);
+                                                            final String basePackages,
+                                                            @Value("${bwee.namespace:}")
+                                                            final String namespace) {
+    return new ObjectifyFactoryFactory(applicationContext, memcacheService, basePackages, namespace);
   }
 
   @Bean
@@ -34,6 +38,7 @@ public class ObjectifyAutoConfiguration {
   }
 
   @Bean
+  @Order(Ordered.HIGHEST_PRECEDENCE + 1)
   @ConditionalOnMissingBean(ObjectifyFilter.class)
   public ObjectifyFilter ObjectifyFilter() {
     return new ObjectifyFilter();

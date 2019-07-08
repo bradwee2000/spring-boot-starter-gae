@@ -76,11 +76,16 @@ public class AuthHandler {
 
     verifyAuthToken(joinPoint);
 
-    if (authUserContext.getAuthUser() != null) {
-      LOG.info("Requested by user.id={}", authUserContext.getAuthUser().getId());
+    final AuthUser user = authUserContext.getAuthUser();
+    if (user != null) {
+      LOG.info("Requested by user.id={}, user.name={}, user.roles={}",
+              user.getId(), user.getName(), user.getRoles());
     }
   }
 
+  /**
+   * Check if request is from logged in admin.
+   */
   private boolean checkIsAdmin() {
     if (userService.isUserLoggedIn() && userService.isUserAdmin()) {
       final User user = userService.getCurrentUser();
@@ -91,6 +96,9 @@ public class AuthHandler {
     return false;
   }
 
+  /**
+   * Check if request is from system service.
+   */
   private boolean checkIsService() {
     final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
         .currentRequestAttributes()).getRequest();

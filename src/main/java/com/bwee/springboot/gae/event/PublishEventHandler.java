@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.event;
 
+import com.bwee.springboot.gae.util.MethodUtils;
 import com.bwee.springboot.gae.pubsub.PubSubPublisher;
 import com.bwee.springboot.gae.pubsub.TopicPublisher;
 import com.google.common.collect.Maps;
@@ -21,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Publish returned object to topic in Google PubSub.
@@ -46,7 +48,13 @@ public class PublishEventHandler implements ApplicationContextAware {
 
     final String topic = event.value();
     final Object payload = convertPayload(event, result);
-    final Map<String, String> attributes = extractAttributes(joinPoint);
+    final Map<String, String> attributes = MethodUtils.extractMethodParameters(joinPoint, PublishAttr.class).stream()
+            .collect(Collectors.toMap(
+                    // Get attribute name from annotation or declared parameter name
+                    p -> StringUtils.isEmpty(p.getAnnotation().value()) ?
+                            p.getDeclaredName() :
+                            p.getAnnotation().value(),
+                    p -> String.valueOf(p.getValue())));
 
     final TopicPublisher topicPublisher = publisher.forTopic(topic).attributes(attributes);
 

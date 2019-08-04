@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,7 +50,6 @@ public class PublishTaskHandlerTest {
         service.publishWithPayload();
 
         verify(taskFactory).submit(captor.capture());
-
         assertThat(captor.getValue().getUrl()).isEqualTo("/url-path");
         assertThat(captor.getValue().getQueueName()).isNull();
         assertThat(captor.getValue().getPayload()).isEqualTo("");
@@ -62,7 +62,6 @@ public class PublishTaskHandlerTest {
         service.publishPostWithNoPayload();
 
         verify(taskFactory).submit(captor.capture());
-
         assertThat(captor.getValue().getUrl()).isEqualTo("/url-path");
         assertThat(captor.getValue().getMethod()).isEqualTo(TaskMethod.POST);
         assertThat(captor.getValue().getQueueName()).isNull();
@@ -76,8 +75,29 @@ public class PublishTaskHandlerTest {
         service.publishPostWithNullPayload();
 
         verify(taskFactory).submit(captor.capture());
-
         assertThat(captor.getValue().getPayload()).isEqualTo("");
+    }
+
+    @Test
+    public void testPublishWithQueue_shouldPublishToQueue() {
+        final ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
+
+        service.publishWithQueue();
+
+        verify(taskFactory).submit(captor.capture());
+        assertThat(captor.getValue().getQueueName()).isEqualTo("test-queue");
+    }
+
+    @Test
+    public void testPublishWithPathParams_shouldReplacePathVariablesWithParamValues() {
+        final ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
+
+        service.publishWithPathVariables(123, "test");
+        service.publishWithPathVariables(null, "");
+
+        verify(taskFactory, times(2)).submit(captor.capture());
+        assertThat(captor.getAllValues().get(0)).extracting(v -> v.getUrl()).isEqualTo("/url-path/123/test");
+        assertThat(captor.getAllValues().get(1)).extracting(v -> v.getUrl()).isEqualTo("/url-path/null/");
     }
 
     @Configuration
@@ -104,6 +124,17 @@ public class PublishTaskHandlerTest {
         @PublishTask(path = "/url-path", method = TaskMethod.POST)
         public List<String> publishPostWithNullPayload() {
             return null;
+        }
+
+        @PublishTask(path = "/url-path", queue = "test-queue")
+        public List<String> publishWithQueue() {
+            return null;
+        }
+
+        @PublishTask(path = "/url-path/{id}/{extra}")
+        public void publishWithPathVariables(@TaskPathVariable Integer id,
+                                             @TaskPathVariable("extra") String extraStr) {
+
         }
     }
 }

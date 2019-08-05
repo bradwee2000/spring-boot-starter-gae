@@ -17,7 +17,7 @@ public class Task {
     private String name;
     private String queueName;
     private String url;
-    private String payload = ""; // error if null
+    private Object payload;
     private Multimap<String, String> params = MultimapBuilder.hashKeys().arrayListValues().build();
     private Multimap<String, String> headers = MultimapBuilder.hashKeys().arrayListValues().build();
     private TaskMethod method = TaskMethod.GET;
@@ -63,11 +63,11 @@ public class Task {
         return this;
     }
 
-    public String getPayload() {
+    public Object getPayload() {
         return payload;
     }
 
-    public Task setPayload(String payload) {
+    public Task setPayload(Object payload) {
         this.payload = payload;
         return this;
     }

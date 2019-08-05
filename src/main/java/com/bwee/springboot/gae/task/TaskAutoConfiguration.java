@@ -20,20 +20,21 @@ public class TaskAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(TaskFactory.class)
-    public TaskFactory taskFactory(final QueueFactory queueFactory) {
-        return new TaskFactory(queueFactory);
+    public TaskFactory taskFactory(final QueueFactory queueFactory,
+                                   @Qualifier("taskObjectMapper") final ObjectMapper om) {
+        return new TaskFactory(queueFactory, om);
     }
 
     @Bean
     @ConditionalOnMissingBean(PublishTaskHandler.class)
     public PublishTaskHandler publishTaskHandler(final TaskFactory taskFactory,
-                                                 @Qualifier("publishTaskObjectMapper") final ObjectMapper om) {
+                                                 @Qualifier("taskObjectMapper") final ObjectMapper om) {
         return new PublishTaskHandler(taskFactory, om);
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "publishTaskObjectMapper")
-    public ObjectMapper publishTaskObjectMapper() {
+    @ConditionalOnMissingBean(name = "taskObjectMapper")
+    public ObjectMapper taskObjectMapper() {
         return new ObjectMapper();
     }
 }

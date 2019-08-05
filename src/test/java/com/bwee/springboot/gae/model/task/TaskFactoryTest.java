@@ -4,6 +4,8 @@ import com.bwee.springboot.gae.task.QueueFactory;
 import com.bwee.springboot.gae.task.Task;
 import com.bwee.springboot.gae.task.TaskFactory;
 import com.bwee.springboot.gae.task.TaskMethod;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.collect.ImmutableMap;
@@ -11,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +26,7 @@ import static org.mockito.Mockito.when;
  */
 public class TaskFactoryTest {
 
+    private final ObjectMapper om = new ObjectMapper();
     private TaskFactory taskFactory;
     private QueueFactory queueFactory;
     private Queue queue1;
@@ -34,7 +38,7 @@ public class TaskFactoryTest {
         queue1 = mock(Queue.class);
         queue2 = mock(Queue.class);
 
-        taskFactory = new TaskFactory(queueFactory);
+        taskFactory = new TaskFactory(queueFactory, om);
 
         when(queueFactory.getQueue("queue1")).thenReturn(queue1);
         when(queueFactory.getQueue("queue2")).thenReturn(queue2);
@@ -88,5 +92,42 @@ public class TaskFactoryTest {
         // Queue2 should have 2 task
         verify(queue2).add(captor.capture());
         assertThat(captor.getValue()).hasSize(1);
+    }
+
+    @Test
+    public void testSubmitWithObjectPayload_shouldConvertPayloadToJson() {
+        taskFactory.createWithUrl("/test").setQueueName("queue1").setPayload(new DummyPayload()).submit();
+
+        final ArgumentCaptor<TaskOptions> captor = ArgumentCaptor.forClass(TaskOptions.class);
+        verify(queue1).add(captor.capture());
+
+        final TaskOptions task = captor.getValue();
+        assertThat(new String(task.getPayload())).isEqualTo("{\"name\":\"John Doe\",\"age\":31}");
+    }
+
+    /**
+     * Dummy payload class.
+     */
+    public static class DummyPayload {
+        private String name = "John Doe";
+        private int age = 31;
+
+        public String getName() {
+            return name;
+        }
+
+        public DummyPayload setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public DummyPayload setAge(int age) {
+            this.age = age;
+            return this;
+        }
     }
 }

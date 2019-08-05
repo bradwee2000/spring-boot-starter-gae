@@ -1,5 +1,7 @@
 package com.bwee.springboot.gae.task;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.appengine.api.taskqueue.RetryOptions;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.collect.Lists;
@@ -18,79 +20,100 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author bradwee2000@gmail.com
  */
 public class TaskFactory {
-  private static final Logger LOG = LoggerFactory.getLogger(TaskFactory.class);
-  private static final RetryOptions DEFAULT_RETRY_OPTIONS = RetryOptions.Builder.withDefaults()
-          .taskRetryLimit(5)
-          .minBackoffSeconds(3)
-          .maxBackoffSeconds(300)
-          .taskAgeLimitSeconds(3600)
-          .maxDoublings(3);
+    private static final Logger LOG = LoggerFactory.getLogger(TaskFactory.class);
+    private static final RetryOptions DEFAULT_RETRY_OPTIONS = RetryOptions.Builder.withDefaults()
+            .taskRetryLimit(5)
+            .minBackoffSeconds(3)
+            .maxBackoffSeconds(300)
+            .taskAgeLimitSeconds(3600)
+            .maxDoublings(3);
 
-  private final QueueFactory queueFactory;
+    private final QueueFactory queueFactory;
+    private final ObjectMapper objectMapper;
 
-  public TaskFactory(final QueueFactory queueFactory) {
-    this.queueFactory = queueFactory;
-  }
-
-  public Task createWithUrl(final String url) {
-    return new Task(this).setUrl(url);
-  }
-
-  public void submit(final Task task) {
-    checkNotNull(task);
-
-    final TaskOptions taskOptions = toTaskOptions(task);
-
-    // Submit task
-    queueFactory.getQueue(task.getQueueName()).add(taskOptions);
-  }
-
-  public void submitAll(final Task task, final Task ...more) {
-    submitAll(Lists.asList(task, more));
-  }
-
-  public void submitAll(final Collection<Task> tasks) {
-    // Group by queue name
-    final Map<String, List<Task>> map = tasks.stream()
-        .collect(Collectors.groupingBy(task -> task.getQueueName()));
-
-    // Submit tasks per queue
-    for (final String queueName : map.keySet()) {
-      final List<TaskOptions> taskOptions = map.get(queueName).stream()
-          .map(this::toTaskOptions)
-          .collect(Collectors.toList());
-      queueFactory.getQueue(queueName).add(taskOptions);
-    }
-  }
-
-  private TaskOptions toTaskOptions(final Task task) {
-    final TaskOptions taskOptions = TaskOptions.Builder.withUrl(task.getUrl())
-        .taskName(task.getName())
-        .retryOptions(DEFAULT_RETRY_OPTIONS)
-        .method(method(task.getMethod()));
-
-    // Add payload only if exists. Cannot be null.
-    if (!StringUtils.isEmpty(task.getPayload())) {
-      taskOptions.payload(task.getPayload());
+    public TaskFactory(final QueueFactory queueFactory,
+                       final ObjectMapper objectMapper) {
+        this.queueFactory = queueFactory;
+        this.objectMapper = objectMapper;
     }
 
-    // Add other headers
-    task.getHeaders().forEach((key, values) -> values.stream().forEach(value -> taskOptions.header(key, value)));
-
-    // Replace content type. Need to remove first otherwise it will append.
-    taskOptions.removeHeader("content-type").header("content-type", task.getContentType());
-
-    // Add parameters
-    task.getParams().forEach((key, values) -> values.stream().forEach(value -> taskOptions.param(key, value)));
-
-    return taskOptions;
-  }
-
-  public TaskOptions.Method method(TaskMethod taskMethod) {
-    switch(taskMethod) {
-      case GET: return TaskOptions.Method.GET;
-      case POST: return TaskOptions.Method.POST;
+    public Task createWithUrl(final String url) {
+        return new Task(this).setUrl(url);
     }
-    throw new IllegalStateException("No method exists for " + taskMethod);
-  }
+
+    public void submit(final Task task) {
+        checkNotNull(task);
+
+        final TaskOptions taskOptions = toTaskOptions(task);
+
+        // Submit task
+        queueFactory.getQueue(task.getQueueName()).add(taskOptions);
+    }
+
+    public void submitAll(final Task task, final Task... more) {
+        submitAll(Lists.asList(task, more));
+    }
+
+    public void submitAll(final Collection<Task> tasks) {
+        // Group by queue name
+        final Map<String, List<Task>> map = tasks.stream()
+                .collect(Collectors.groupingBy(task -> task.getQueueName()));
+
+        // Submit tasks per queue
+        for (final String queueName : map.keySet()) {
+            final List<TaskOptions> taskOptions = map.get(queueName).stream()
+                    .map(this::toTaskOptions)
+                    .collect(Collectors.toList());
+            queueFactory.getQueue(queueName).add(taskOptions);
+        }
+    }
+
+    private TaskOptions toTaskOptions(final Task task) {
+        final TaskOptions taskOptions = TaskOptions.Builder.withUrl(task.getUrl())
+                .taskName(task.getName())
+                .retryOptions(DEFAULT_RETRY_OPTIONS)
+                .method(method(task.getMethod()));
+
+        // Add payload only if exists. Cannot be null.
+        if (task.getPayload() != null) {
+            final Object payload = task.getPayload();
+
+            if (payload instanceof String) {
+                taskOptions.payload((String) task.getPayload());
+            } else if (payload instanceof byte[]) {
+                taskOptions.payload((byte[]) task.getPayload());
+            } else {
+                taskOptions.payload(toJson(task.getPayload()));
+            }
+        }
+
+        // Add other headers
+        task.getHeaders().forEach((key, values) -> values.stream().forEach(value -> taskOptions.header(key, value)));
+
+        // Replace content type. Need to remove first otherwise it will append.
+        taskOptions.removeHeader("content-type").header("content-type", task.getContentType());
+
+        // Add parameters
+        task.getParams().forEach((key, values) -> values.stream().forEach(value -> taskOptions.param(key, value)));
+
+        return taskOptions;
+    }
+
+    public TaskOptions.Method method(TaskMethod taskMethod) {
+        switch (taskMethod) {
+            case GET:
+                return TaskOptions.Method.GET;
+            case POST:
+                return TaskOptions.Method.POST;
+        }
+        throw new IllegalStateException("No method exists for " + taskMethod);
+    }
+
+    private String toJson(final Object payload) {
+        try {
+            return objectMapper.writeValueAsString(payload);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

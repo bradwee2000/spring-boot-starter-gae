@@ -52,7 +52,7 @@ public class PublishTaskHandlerTest {
         verify(taskFactory).submit(captor.capture());
         assertThat(captor.getValue().getUrl()).isEqualTo("/url-path");
         assertThat(captor.getValue().getQueueName()).isNull();
-        assertThat(captor.getValue().getPayload()).isEqualTo("");
+        assertThat(captor.getValue().getPayload()).isNull();
     }
 
     @Test
@@ -65,7 +65,7 @@ public class PublishTaskHandlerTest {
         assertThat(captor.getValue().getUrl()).isEqualTo("/url-path");
         assertThat(captor.getValue().getMethod()).isEqualTo(TaskMethod.POST);
         assertThat(captor.getValue().getQueueName()).isNull();
-        assertThat(captor.getValue().getPayload()).isEqualTo("");
+        assertThat(captor.getValue().getPayload()).isNull();
     }
 
     @Test
@@ -75,7 +75,7 @@ public class PublishTaskHandlerTest {
         service.publishPostWithNullPayload();
 
         verify(taskFactory).submit(captor.capture());
-        assertThat(captor.getValue().getPayload()).isEqualTo("");
+        assertThat(captor.getValue().getPayload()).isNull();
     }
 
     @Test

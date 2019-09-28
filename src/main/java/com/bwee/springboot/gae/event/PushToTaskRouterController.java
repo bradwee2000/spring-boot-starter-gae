@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.event;
 
+import com.bwee.springboot.gae.auth.Secured;
 import com.bwee.springboot.gae.pubsub.PubSubMessage;
 import com.bwee.springboot.gae.task.TaskFactory;
 import com.bwee.springboot.gae.task.TaskMethod;
@@ -19,6 +20,7 @@ import java.util.Base64;
  *
  * @author bradwee2000@gmail.com
  */
+@Secured
 @RequestMapping("/push")
 public class PushToTaskRouterController {
   private static final Logger LOG = LoggerFactory.getLogger(PushToTaskRouterController.class);

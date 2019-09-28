@@ -1,6 +1,7 @@
 package com.bwee.springboot.gae.model.service;
 
 import com.bwee.springboot.gae.model.dao.ConfigDao;
+import com.bwee.springboot.gae.model.pojo.AtomicLong;
 import com.bwee.springboot.gae.model.pojo.Config;
 import com.google.gson.Gson;
 import org.assertj.core.api.Assertions;
@@ -10,12 +11,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -44,6 +48,7 @@ public class ConfigServiceTest {
     service = new ConfigService(configDao, new Gson());
 
     // Setup configs
+    when(configDao.transact(any())).thenAnswer(arg -> ((Supplier) arg.getArgument(0)).get());
     when(configDao.findById(anyString())).thenReturn(Optional.empty());
     when(configDao.findById("phone")).thenReturn(Optional.of(phone));
     when(configDao.findById("email")).thenReturn(Optional.of(email));
@@ -103,7 +108,7 @@ public class ConfigServiceTest {
     service.setProperty("Name", "Yalex");
 
     final ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
-    Mockito.verify(configDao).save(captor.capture());
+    verify(configDao).save(captor.capture());
     assertThat(captor.getValue().getValue()).isEqualTo("Yalex");
   }
 
@@ -112,7 +117,7 @@ public class ConfigServiceTest {
     service.setProperty("Quantity", 100);
 
     final ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
-    Mockito.verify(configDao).save(captor.capture());
+    verify(configDao).save(captor.capture());
     assertThat(captor.getValue().getValue()).isEqualTo("100");
   }
 
@@ -121,7 +126,7 @@ public class ConfigServiceTest {
     service.setProperty("IsDone", false);
 
     final ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
-    Mockito.verify(configDao).save(captor.capture());
+    verify(configDao).save(captor.capture());
     assertThat(captor.getValue().getValue()).isEqualTo("false");
   }
 
@@ -130,7 +135,35 @@ public class ConfigServiceTest {
     service.setProperty("Null", null);
 
     final ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
-    Mockito.verify(configDao).save(captor.capture());
+    verify(configDao).save(captor.capture());
     assertThat(captor.getValue().getValue()).isEqualTo("null");
+  }
+
+  @Test
+  public void testGetAtomicLong_shouldReturnAtomicLong() {
+    when(configDao.findById("test.atomic.long")).thenReturn(Optional.of(new Config().setValue("10")));
+
+    final AtomicLong atomicLong = service.getAtomicLong("test.atomic.long");
+
+    assertThat(atomicLong.get()).isEqualTo(10l);
+
+    assertThat(atomicLong.getAndIncrement()).isEqualTo(10l);
+    final ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
+    verify(configDao).save(captor.capture());
+    assertThat(captor.getValue().getValue()).isEqualTo("11");
+    assertThat(captor.getValue().getGroup()).isNull();
+  }
+
+  @Test
+  public void testGetNonExistingAtomicLong_shouldReturnAtomicLongWithValueZero() {
+    final AtomicLong atomicLong = service.getAtomicLong("test.unknown.atomic.long");
+
+    assertThat(atomicLong.get()).isEqualTo(0l);
+
+    assertThat(atomicLong.getAndIncrement()).isEqualTo(0l);
+    final ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
+    verify(configDao).save(captor.capture());
+    assertThat(captor.getValue().getValue()).isEqualTo("1");
+    assertThat(captor.getValue().getGroup()).isNull();
   }
 }

@@ -10,13 +10,16 @@ public class AtomicLong {
     private final Supplier<Long> get;
     private final Consumer<Long> set;
     private final Function<Long, Long> getAndIncrement;
+    private final Consumer<String> setGroup;
 
     public AtomicLong(final Supplier<Long> get,
                       final Consumer<Long> set,
-                      final Function<Long, Long> getAndIncrement) {
+                      final Function<Long, Long> getAndIncrement,
+                      final Consumer<String> setGroup) {
         this.get = get;
         this.set = set;
         this.getAndIncrement = getAndIncrement;
+        this.setGroup = setGroup;
     }
 
     public long get() {
@@ -33,6 +36,11 @@ public class AtomicLong {
 
     public long getAndIncrement(final long value) {
         return getAndIncrement.apply(value);
+    }
+
+    public AtomicLong setGroup(final String group) {
+        setGroup.accept(group);
+        return this;
     }
 
     @Override

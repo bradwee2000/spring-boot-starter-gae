@@ -4,6 +4,7 @@ import com.bwee.springboot.gae.model.dao.ConfigDao;
 import com.bwee.springboot.gae.model.pojo.AtomicLong;
 import com.bwee.springboot.gae.model.pojo.Config;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,20 +47,49 @@ public class ConfigService {
    * Set config property.
    */
   public void setProperty(final String key, final Object value) {
-    final Config config = configDao.findById(key).orElse(new Config().setId(key));
-
     final String json = value instanceof String ? (String) value : gson.toJson(value);
 
-    config.setValue(json);
+    final Config config = configDao.findById(key)
+            .orElse(new Config().setId(key))
+            .setValue(json);
 
+    configDao.save(config);
+  }
+
+  /**
+   * Set config property.
+   */
+  public void setProperty(final String key, final String group, final Object value) {
+    final String json = value instanceof String ? (String) value : gson.toJson(value);
+
+    final Config config = configDao.findById(key)
+            .orElse(new Config().setId(key))
+            .setGroup(group)
+            .setValue(json);
+
+    config.setValue(json);
     configDao.save(config);
   }
 
   public AtomicLong getAtomicLong(final String key) {
     return new AtomicLong(
             () -> getAtomicLongValue(key),
-            (v) -> setProperty(key, v),
-            (i) -> getAtomicLongValueAndIncrement(key, i));
+            value -> setProperty(key, value),
+            inc -> getAtomicLongValueAndIncrement(key, inc),
+            group -> setGroup(key, group));
+  }
+
+  public void setGroup(final String key, final String group) {
+    final Config config = configDao.findById(key)
+            .orElse(new Config().setId(key));
+    if (!StringUtils.equals(config.getGroup(), group)) {
+      config.setGroup(group);
+      configDao.save(config);
+    }
+  }
+
+  public Optional<String> getGroup(final String key) {
+    return configDao.findById(key).map(c -> c.getGroup());
   }
 
   private Long getAtomicLongValue(final String key) {

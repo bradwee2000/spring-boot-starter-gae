@@ -61,7 +61,7 @@ public class AuthAutoConfiguration {
                                  final AuthTokenTranslator authTokenTranslator,
                                  final PermissionService permissionService,
                                  @Value("${bwee.role.admin:admin}") final String adminRole,
-                                 @Value("${bwee.role.service:service}") final String serviceRole) {
+                                 @Value("${bwee.role.service:system}") final String serviceRole) {
     return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator, permissionService,
         adminRole, serviceRole);
   }

@@ -17,7 +17,8 @@ public class AuthUserContext<T extends AuthUser> {
     return contextProvider.get().getUser();
   }
 
-  public void setAuthUser(final T user) {
+  public AuthUserContext setAuthUser(final T user) {
     contextProvider.get().setUser(user);
+    return this;
   }
 }

@@ -15,13 +15,14 @@ import java.util.Optional;
 /**
  * @author bradwee2000@gmail.com
  */
-public class ConfigService {
+public class ConfigService extends AbstractService<String, Config> {
   private static final Logger LOG = LoggerFactory.getLogger(ConfigService.class);
 
   private final ConfigDao configDao;
   private final Gson gson;
 
   public ConfigService(final ConfigDao configDao, final Gson gson) {
+    super(configDao);
     this.configDao = configDao;
     this.gson = gson;
   }

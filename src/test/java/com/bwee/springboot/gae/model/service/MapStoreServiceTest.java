@@ -42,15 +42,16 @@ public class MapStoreServiceTest {
 
   @Test
   public void testGetWithNoValues_shouldReturnEmptyMap() {
-    final Map<String, String> map = mapStoreService.get();
+    final Map<String, String> map = mapStoreService.getAll();
     assertThat(map).isEmpty();
   }
 
   @Test
-  public void testGetExistingValues_shouldReturnMapWithValues() {
+  public void testGetAllExistingValues_shouldReturnMapWithValues() {
     map.put("A", "BCD");
-    final Map<String, String> map = mapStoreService.get();
+    final Map<String, String> map = mapStoreService.getAll();
     assertThat(map).containsOnlyKeys("A").containsValue("BCD");
+    assertThat(map.get("A")).isEqualTo("BCD");
   }
 
   @Test
@@ -117,6 +118,6 @@ public class MapStoreServiceTest {
     when(configService.getProperty("test.map"))
         .thenReturn(new ConfigService.PropertyConverter(new Gson(), Optional.of(jsonValue)));
 
-    assertThat(intMapStoreService.get().get("LILAC")).isEqualTo(1000);
+    assertThat(intMapStoreService.getAll().get("LILAC")).isEqualTo(1000);
   }
 }

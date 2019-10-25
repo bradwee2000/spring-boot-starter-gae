@@ -9,4 +9,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.bwee.springboot.gae.pubsub.PubSubAutoConfiguration,\
   com.bwee.springboot.gae.storage.StorageAutoConfiguration,\
   com.bwee.springboot.gae.task.TaskAutoConfiguration,\
-  com.bwee.springboot.gae.thread.ThreadAutoConfiguration
+  com.bwee.springboot.gae.thread.ThreadAutoConfiguration,\
+  com.bwee.springboot.gae.url.UrlFetchAutoConfiguration

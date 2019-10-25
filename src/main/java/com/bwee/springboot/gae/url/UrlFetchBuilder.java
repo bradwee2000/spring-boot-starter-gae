@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.url;
 
+import com.google.appengine.api.urlfetch.HTTPHeader;
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.appengine.api.urlfetch.HTTPRequest;
 import com.google.appengine.api.urlfetch.HTTPResponse;
@@ -13,6 +14,7 @@ import java.util.concurrent.Future;
 
 public class UrlFetchBuilder {
     private final Map<String, String> params = Maps.newHashMap();
+    private final Map<String, String> headers = Maps.newHashMap();
     private final URLFetchService urlFetchService;
     private final String url;
 
@@ -23,6 +25,11 @@ public class UrlFetchBuilder {
 
     public UrlFetchBuilder data(final String key, final String value) {
         params.put(key, value);
+        return this;
+    }
+
+    public UrlFetchBuilder header(final String key, final String value) {
+        headers.put(key, value);
         return this;
     }
 
@@ -42,11 +49,24 @@ public class UrlFetchBuilder {
         return Maps.newHashMap(params);
     }
 
+    protected Map<String, String> getHeaders() {
+        return Maps.newHashMap(headers);
+    }
+
     private Future<HTTPResponse> request(final HTTPMethod method) {
         try {
             final HTTPRequest request = new HTTPRequest(new URL(url), method);
+
+            // Add headers
+            headers.entrySet().stream()
+                    .map(e -> new HTTPHeader(e.getKey(), e.getValue()))
+                    .forEach(h -> request.setHeader(h));
+
+            // Add payload
             request.setPayload(getParamsAsBytes());
+
             return urlFetchService.fetchAsync(request);
+
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

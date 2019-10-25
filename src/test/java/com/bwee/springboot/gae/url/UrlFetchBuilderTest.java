@@ -1,5 +1,6 @@
 package com.bwee.springboot.gae.url;
 
+import com.google.appengine.api.urlfetch.HTTPHeader;
 import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.appengine.api.urlfetch.HTTPRequest;
 import com.google.appengine.api.urlfetch.HTTPResponse;
@@ -78,5 +79,22 @@ public class UrlFetchBuilderTest {
         assertThat(request.getMethod()).isEqualTo(HTTPMethod.GET);
         assertThat(request.getPayload()).isEqualTo("&data=value".getBytes());
         assertThat(request.getURL().toString()).isEqualTo("http://localhost:8080");
+    }
+
+    @Test
+    public void testGetWithHeaders_shouldAddHeaders() {
+        final ArgumentCaptor<HTTPRequest> requestCaptor = ArgumentCaptor.forClass(HTTPRequest.class);
+
+        urlFetchBuilder.header("data", "value")
+                .header("data2", "value2")
+                .header("data", "value3")
+                .get();
+
+        verify(urlFetchService).fetchAsync(requestCaptor.capture());
+
+        final HTTPRequest request = requestCaptor.getValue();
+        assertThat(request.getMethod()).isEqualTo(HTTPMethod.GET);
+        assertThat(request.getHeaders()).extracting(h -> h.getName() + "=" + h.getValue())
+                .containsExactlyInAnyOrder("data=value3", "data2=value2");
     }
 }

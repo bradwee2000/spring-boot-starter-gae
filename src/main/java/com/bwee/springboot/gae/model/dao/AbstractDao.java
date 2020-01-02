@@ -74,11 +74,16 @@ public abstract class AbstractDao<K, T, E extends BasicEntity<K, E>> implements 
     // Prepare keys
     final List<Key<E>> keys = ids.stream().map(this::key).collect(Collectors.toList());
 
-    // Fetch post by keys
-    return ofy().load().keys(keys).values()
-        .stream()
-        .map(e -> toModel(e))
-        .collect(Collectors.toList());
+    // Load async in batches
+    final List<Map<Key<E>, E>> results = Lists.partition(keys, MAX_BATCH_SIZE).stream()
+            .map(partition -> ofy().load().keys(partition))
+            .collect(Collectors.toList());
+
+    // Convert to model and return merged results
+    return results.stream()
+            .flatMap(r -> r.values().stream())
+            .map(e -> toModel(e))
+            .collect(Collectors.toList());
   }
 
   /**

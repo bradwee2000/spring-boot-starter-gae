@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
  * @author bradwee2000@gmail.com
@@ -20,7 +23,7 @@ public interface Dao<K, T, E> {
   /**
    * Returns collection of entities given their ids.
    */
-  List<T> findByIds(final K id, final K ... more);
+  List<T> findByIds(final K id, final K... more);
 
   /**
    * Returns collection of entities given their ids.
@@ -50,7 +53,7 @@ public interface Dao<K, T, E> {
   /**
    * Save entities to database.
    */
-  List<T> saveAll(final T post, final T ... more);
+  List<T> saveAll(final T post, final T... more);
 
   /**
    * Save collection of entities to database.
@@ -65,7 +68,7 @@ public interface Dao<K, T, E> {
   /**
    * Delete entities from database.
    */
-  List<K> deleteAll(final K id, final K ... more);
+  List<K> deleteAll(final K id, final K... more);
 
   /**
    * Delete all entities in given IDs.
@@ -86,4 +89,10 @@ public interface Dao<K, T, E> {
    * Delete entities by Keys.
    */
   List<K> deleteAllByKeys(final List<Key<E>> keys);
+
+  /**
+   *
+   * Executes work in a transaction.
+   */
+  <R> R transact(final Supplier<R> work);
 }

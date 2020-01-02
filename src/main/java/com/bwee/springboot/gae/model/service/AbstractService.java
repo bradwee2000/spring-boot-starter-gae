@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * @author bradwee2000@gmail.com
@@ -82,5 +83,9 @@ public class AbstractService<K, T> implements ModelService<K, T> {
     public K delete(final K id) {
         dao.delete(id);
         return id;
+    }
+
+    public <R> R transact(final Supplier<R> work) {
+        return dao.transact(work);
     }
 }

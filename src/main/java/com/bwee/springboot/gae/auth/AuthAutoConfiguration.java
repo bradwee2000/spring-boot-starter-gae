@@ -7,14 +7,18 @@ import com.bwee.springboot.gae.auth.jwt.AuthTokenSigner;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenTranslator;
 import com.bwee.springboot.gae.auth.jwt.TokenTranslator;
+import com.bwee.springboot.gae.auth.user.AuthUser;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
 import com.bwee.springboot.gae.auth.user.AuthUserHolder;
+import com.bwee.springboot.gae.model.ConfigAutoConfiguration;
+import com.bwee.springboot.gae.model.service.ConfigService;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.context.annotation.RequestScope;
 
 import javax.inject.Provider;
@@ -25,6 +29,7 @@ import java.util.Collections;
  * @author bradwee2000@gmail.com
  */
 @Configuration
+@Import(ConfigAutoConfiguration.class)
 public class AuthAutoConfiguration {
 
   @Bean
@@ -92,8 +97,9 @@ public class AuthAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean(PermissionService.class)
-  public PermissionService permissionService() {
-    return roles -> Collections.emptyList();
+  public PermissionService permissionService(final ConfigService configService,
+                                             final AuthUserContext<? extends AuthUser> userContext) {
+    return new DefaultPermissionService(configService, userContext);
   }
 
   @Bean

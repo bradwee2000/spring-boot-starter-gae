@@ -20,7 +20,6 @@ import org.springframework.core.annotation.Order;
 public class ObjectifyAutoConfiguration {
 
   @Bean
-  @ConditionalOnProperty(prefix = "bwee", name = "objectify.scan.base.packages")
   public ObjectifyFactoryFactory objectifyInitEntityScanner(final ApplicationContext applicationContext,
                                                             @Qualifier("ofyMemcacheService")
                                                             final MemcacheService memcacheService,

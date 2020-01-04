@@ -7,6 +7,7 @@ import com.google.common.base.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.EXPIRED_TOKEN;
@@ -27,13 +28,14 @@ public class AuthorizationException extends RuntimeException {
     return new AuthorizationException(EXPIRED_TOKEN, "Token: " + token);
   }
 
-  public static AuthorizationException missingRoles(final AuthUser authUser) {
-    final String msg = "User " + authUser + " has insufficient privileges";
+  public static AuthorizationException missingRoles(final AuthUser authUser, final Collection<String> roles) {
+    final String msg = "User " + authUser + " does not have required roles: " + Joiner.on(',').join(roles);
     return new AuthorizationException(INSUFFICIENT_RIGHTS, msg);
   }
 
-  public static AuthorizationException missingPermissions(final AuthUser authUser) {
-    final String msg = "User " + authUser + " has insufficient privileges.";
+  public static AuthorizationException missingPermissions(final AuthUser authUser,
+                                                          final Collection<String> permissions) {
+    final String msg = "User " + authUser + " does not have required permissions: " + Joiner.on(',').join(permissions);
     return new AuthorizationException(INSUFFICIENT_RIGHTS, msg);
   }
 

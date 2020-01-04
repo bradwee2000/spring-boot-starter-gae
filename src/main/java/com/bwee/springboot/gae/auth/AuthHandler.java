@@ -22,6 +22,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -145,11 +146,13 @@ public class AuthHandler {
      * Check that user has all the required roles
      */
     private void verifyRoles(final Secured secured, final AuthUser user) {
-        final List<String> expectedRoles = Lists.newArrayList(secured.value());
+        final List<String> expected = Lists.newArrayList(secured.value());
 
         // Must have all required roles
-        if (!user.getRoles().containsAll(expectedRoles)) {
-            throw AuthorizationException.missingRoles(user);
+        if (!user.getRoles().containsAll(expected)) {
+            final List<String> missing = new ArrayList<>(expected);
+            missing.removeAll(user.getRoles());
+            throw AuthorizationException.missingRoles(user, missing);
         }
     }
 
@@ -157,16 +160,18 @@ public class AuthHandler {
      * Check that user has all the required permissions
      */
     private void verifyPermissions(final Secured secured, final AuthUser user) {
-        final List<String> expectedPermissions = Lists.newArrayList(secured.permissions());
+        final List<String> expected = Lists.newArrayList(secured.permissions());
 
-        if (expectedPermissions.isEmpty()) {
+        if (expected.isEmpty()) {
             return;
         }
 
         final List<String> userPermissions = permissionService.getPermissions(user.getRoles());
 
-        if (!userPermissions.containsAll(expectedPermissions)) {
-            throw AuthorizationException.missingPermissions(user);
+        if (!userPermissions.containsAll(expected)) {
+            final List<String> missing = new ArrayList<>(expected);
+            missing.removeAll(userPermissions);
+            throw AuthorizationException.missingPermissions(user, missing);
         }
     }
 

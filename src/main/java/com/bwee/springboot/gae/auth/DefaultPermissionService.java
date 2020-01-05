@@ -30,7 +30,7 @@ public class DefaultPermissionService extends MapStoreService<String, List<Strin
 
     @Override
     public List<String> getRoles() {
-        return getAll().keySet().stream().sorted().collect(toList());
+        return getAll().keySet().stream().sorted().distinct().collect(toList());
     }
 
     @Override

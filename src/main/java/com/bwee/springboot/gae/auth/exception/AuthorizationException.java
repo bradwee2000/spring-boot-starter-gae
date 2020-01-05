@@ -2,16 +2,15 @@ package com.bwee.springboot.gae.auth.exception;
 
 import com.bwee.springboot.gae.auth.user.AuthUser;
 import com.google.common.base.Joiner;
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.EXPIRED_TOKEN;
-import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INSUFFICIENT_RIGHTS;
+import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INSUFFICIENT_PERMISSIONS;
+import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INSUFFICIENT_ROLES;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INVALID_TOKEN;
 
 /**
@@ -30,18 +29,19 @@ public class AuthorizationException extends RuntimeException {
 
   public static AuthorizationException missingRoles(final AuthUser authUser, final Collection<String> roles) {
     final String msg = "User " + authUser + " does not have required roles: " + Joiner.on(',').join(roles);
-    return new AuthorizationException(INSUFFICIENT_RIGHTS, msg);
+    return new AuthorizationException(INSUFFICIENT_ROLES, msg);
   }
 
   public static AuthorizationException missingPermissions(final AuthUser authUser,
                                                           final Collection<String> permissions) {
     final String msg = "User " + authUser + " does not have required permissions: " + Joiner.on(',').join(permissions);
-    return new AuthorizationException(INSUFFICIENT_RIGHTS, msg);
+    return new AuthorizationException(INSUFFICIENT_PERMISSIONS, msg);
   }
 
   public enum ErrorType {
     INVALID_TOKEN("Invalid access token."),
-    INSUFFICIENT_RIGHTS("You have insufficient rights."),
+    INSUFFICIENT_ROLES("You have insufficient roles."),
+    INSUFFICIENT_PERMISSIONS("You have insufficient permissions."),
     EXPIRED_TOKEN("Your session has expired. Please login again.");
 
     String message;
@@ -56,15 +56,18 @@ public class AuthorizationException extends RuntimeException {
   }
 
   private final ErrorType errorType;
+  private final String message;
 
   public AuthorizationException(final ErrorType errorType) {
     super(errorType.getMessage());
     this.errorType = errorType;
+    this.message = null;
   }
 
   public AuthorizationException(final ErrorType errorType, final String message) {
     super(errorType.getMessage() + " " + message);
     this.errorType = errorType;
+    this.message = message;
   }
 
   public ErrorType getErrorType() {
@@ -72,22 +75,29 @@ public class AuthorizationException extends RuntimeException {
   }
 
   @Override
+  public String getMessage() {
+    return message;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     AuthorizationException that = (AuthorizationException) o;
-    return errorType == that.errorType;
+    return errorType == that.errorType &&
+            Objects.equals(message, that.message);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(errorType);
+    return Objects.hash(errorType, message);
   }
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("errorType", errorType)
-        .toString();
+    return "AuthorizationException{" +
+            "errorType=" + errorType +
+            ", message='" + message + '\'' +
+            '}';
   }
 }

@@ -24,7 +24,7 @@ public interface PermissionService {
     default void hasPermissionOrThrow(final String permission) {
         if (!hasPermission(permission)) {
             throw new AuthorizationException(
-                    AuthorizationException.ErrorType.INSUFFICIENT_RIGHTS,
+                    AuthorizationException.ErrorType.INSUFFICIENT_PERMISSIONS,
                     "Missing permission: " + permission);
         }
     };

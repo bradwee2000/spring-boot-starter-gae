@@ -45,7 +45,7 @@ public class DefaultPermissionService extends MapStoreService<String, List<Strin
     @Override
     public boolean hasPermission(final String permission) {
         final Collection<String> roles = userContext.getAuthUser().getRoles();
-        return roles.contains(permission);
+        return getPermissions(roles).contains(permission);
     }
 
     @Override

@@ -3,12 +3,14 @@ package com.bwee.springboot.gae.auth;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.bwee.springboot.gae.auth.jwt.AuthFilter;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenSigner;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenVerifier;
 import com.bwee.springboot.gae.auth.jwt.AuthTokenTranslator;
 import com.bwee.springboot.gae.auth.jwt.TokenTranslator;
 import com.bwee.springboot.gae.auth.user.AuthUser;
 import com.bwee.springboot.gae.auth.user.AuthUserContext;
+import com.bwee.springboot.gae.auth.user.AuthUserFactory;
 import com.bwee.springboot.gae.auth.user.AuthUserHolder;
 import com.bwee.springboot.gae.model.ConfigAutoConfiguration;
 import com.bwee.springboot.gae.model.service.ConfigService;
@@ -19,6 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.context.annotation.RequestScope;
 
 import javax.inject.Provider;
@@ -31,6 +34,12 @@ import java.util.Collections;
 @Configuration
 @Import(ConfigAutoConfiguration.class)
 public class AuthAutoConfiguration {
+
+  @Value("${bwee.role.admin:admin}")
+  private String adminRole;
+
+  @Value("${bwee.role.service:system}")
+  private String serviceRole;
 
   @Bean
   @ConditionalOnMissingBean(JWTVerifier.class)
@@ -60,21 +69,21 @@ public class AuthAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean(AuthHandler.class)
-  public AuthHandler authHandler(final AuthTokenVerifier authTokenVerifier,
-                                 final UserService userService,
-                                 final AuthUserContext authUserContext,
-                                 final AuthTokenTranslator authTokenTranslator,
-                                 final PermissionService permissionService,
-                                 @Value("${bwee.role.admin:admin}") final String adminRole,
-                                 @Value("${bwee.role.service:system}") final String serviceRole) {
-    return new AuthHandler(authTokenVerifier, userService, authUserContext, authTokenTranslator, permissionService,
-        adminRole, serviceRole);
+  public AuthHandler authHandler(final AuthUserContext authUserContext,
+                                 final PermissionService permissionService) {
+    return new AuthHandler(authUserContext, permissionService, adminRole, serviceRole);
   }
 
   @Bean
   @ConditionalOnMissingBean(TokenTranslator.class)
-  public AuthTokenTranslator tokenTranslator(final Clock clock) {
-    return new AuthTokenTranslator(clock);
+  public AuthTokenTranslator tokenTranslator(final Clock clock, final AuthUserFactory userFactory) {
+    return new AuthTokenTranslator(clock, userFactory);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean(AuthUserFactory.class)
+  public AuthUserFactory authUserFactory() {
+    return new AuthUserFactory();
   }
 
   @Bean
@@ -107,5 +116,16 @@ public class AuthAutoConfiguration {
   @ConditionalOnMissingBean(AuthUserHolder.class)
   public AuthUserHolder authUserHolder() {
     return new AuthUserHolder();
+  }
+
+  @Bean
+  @Order(1)
+  @ConditionalOnMissingBean(AuthFilter.class)
+  public AuthFilter authFilter(final AuthUserContext userContext,
+                               final AuthTokenVerifier tokenVerifier,
+                               final AuthTokenTranslator tokenTranslator,
+                               final AuthUserFactory userFactory,
+                               final UserService userService) {
+    return new AuthFilter(userContext, tokenVerifier, tokenTranslator, userFactory, userService, adminRole, serviceRole);
   }
 }

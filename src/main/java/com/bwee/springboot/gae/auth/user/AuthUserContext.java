@@ -1,5 +1,7 @@
 package com.bwee.springboot.gae.auth.user;
 
+import com.bwee.springboot.gae.auth.jwt.TokenStatus;
+
 import javax.inject.Provider;
 
 /**
@@ -19,6 +21,24 @@ public class AuthUserContext<T extends AuthUser> {
 
   public AuthUserContext setAuthUser(final T user) {
     contextProvider.get().setUser(user);
+    return this;
+  }
+
+  public String getToken() {
+    return contextProvider.get().getToken();
+  }
+
+  public AuthUserContext setToken(final String token) {
+    contextProvider.get().setToken(token);
+    return this;
+  }
+
+  public TokenStatus getTokenStatus() {
+    return contextProvider.get().getTokenStatus();
+  }
+
+  public AuthUserContext setTokenStatus(final TokenStatus tokenStatus) {
+    contextProvider.get().setTokenStatus(tokenStatus);
     return this;
   }
 }

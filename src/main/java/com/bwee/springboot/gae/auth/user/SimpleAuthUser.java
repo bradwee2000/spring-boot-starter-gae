@@ -25,6 +25,17 @@ public class SimpleAuthUser implements AuthUser {
     this(id, null, Collections.emptyList());
   }
 
+  public SimpleAuthUser(final String id, final String name, final String roles) {
+    this(id, name, Collections.singletonList(roles));
+  }
+
+  public SimpleAuthUser(final String id,
+                        final String name,
+                        final String role,
+                        final String ... moreRoles) {
+    this(id, name, Lists.asList(role, moreRoles));
+  }
+
   public SimpleAuthUser(String id, String name, List<String> roles) {
     this.id = id;
     this.name = name;
@@ -80,7 +91,6 @@ public class SimpleAuthUser implements AuthUser {
     if (o == null || getClass() != o.getClass()) return false;
     SimpleAuthUser that = (SimpleAuthUser) o;
     return id == that.id &&
-
             Objects.equal(name, that.name) &&
             Objects.equal(roles, that.roles);
   }

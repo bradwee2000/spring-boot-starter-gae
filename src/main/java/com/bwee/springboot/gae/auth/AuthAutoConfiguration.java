@@ -123,9 +123,8 @@ public class AuthAutoConfiguration {
   @ConditionalOnMissingBean(AuthFilter.class)
   public AuthFilter authFilter(final AuthUserContext userContext,
                                final AuthTokenVerifier tokenVerifier,
-                               final AuthTokenTranslator tokenTranslator,
                                final AuthUserFactory userFactory,
                                final UserService userService) {
-    return new AuthFilter(userContext, tokenVerifier, tokenTranslator, userFactory, userService, adminRole, serviceRole);
+    return new AuthFilter(userContext, tokenVerifier, userFactory, userService, adminRole, serviceRole);
   }
 }

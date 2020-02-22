@@ -11,6 +11,7 @@ import java.util.Objects;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.EXPIRED_TOKEN;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INSUFFICIENT_PERMISSIONS;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INSUFFICIENT_ROLES;
+import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INVALID_SIGNATURE;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.INVALID_TOKEN;
 import static com.bwee.springboot.gae.auth.exception.AuthorizationException.ErrorType.MISSING_TOKEN;
 
@@ -32,6 +33,10 @@ public class AuthorizationException extends RuntimeException {
     return new AuthorizationException(EXPIRED_TOKEN, "Token: " + token);
   }
 
+  public static AuthorizationException invalidSignature(final String token) {
+    return new AuthorizationException(INVALID_SIGNATURE, "Token: " + token);
+  }
+
   public static AuthorizationException missingRoles(final AuthUser authUser, final Collection<String> roles) {
     final String msg = "User " + authUser + " does not have required roles: " + Joiner.on(',').join(roles);
     return new AuthorizationException(INSUFFICIENT_ROLES, msg);
@@ -45,6 +50,7 @@ public class AuthorizationException extends RuntimeException {
 
   public enum ErrorType {
     INVALID_TOKEN("Invalid access token."),
+    INVALID_SIGNATURE("Invalid signature."),
     INSUFFICIENT_ROLES("You have insufficient roles."),
     INSUFFICIENT_PERMISSIONS("You have insufficient permissions."),
     EXPIRED_TOKEN("Your session has expired. Please login again."),

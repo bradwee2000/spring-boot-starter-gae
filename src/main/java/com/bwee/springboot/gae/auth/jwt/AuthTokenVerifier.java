@@ -2,6 +2,7 @@ package com.bwee.springboot.gae.auth.jwt;
 
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.bwee.springboot.gae.auth.exception.AuthorizationException;
@@ -30,6 +31,8 @@ public class AuthTokenVerifier<T extends AuthUser> {
       throw AuthorizationException.invalidToken(token);
     } catch (final TokenExpiredException e) {
       throw AuthorizationException.expiredToken(token);
+    } catch (final SignatureVerificationException e) {
+      throw AuthorizationException.invalidSignature(token);
     }
   }
 }

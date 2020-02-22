@@ -14,6 +14,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -29,7 +30,6 @@ public class AuthFilter implements Filter {
 
     private final AuthUserContext userContext;
     private final AuthTokenVerifier tokenVerifier;
-    private final AuthTokenTranslator tokenTranslator;
     private final AuthUserFactory userFactory;
     private final UserService userService;
     private final String adminRole;
@@ -37,18 +37,21 @@ public class AuthFilter implements Filter {
 
     public AuthFilter(final AuthUserContext userContext,
                       final AuthTokenVerifier tokenVerifier,
-                      final AuthTokenTranslator tokenTranslator,
                       final AuthUserFactory userFactory,
                       final UserService userService,
                       final String adminRole,
                       final String serviceRole) {
         this.userContext = userContext;
         this.tokenVerifier = tokenVerifier;
-        this.tokenTranslator = tokenTranslator;
         this.userFactory = userFactory;
         this.userService = userService;
         this.adminRole = adminRole;
         this.serviceRole = serviceRole;
+    }
+
+    @Override
+    public void init(final FilterConfig filterConfig) throws ServletException {
+
     }
 
     @Override
@@ -62,6 +65,11 @@ public class AuthFilter implements Filter {
             checkToken(req);
         }
         filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    @Override
+    public void destroy() {
+
     }
 
     /**

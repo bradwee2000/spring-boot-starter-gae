@@ -21,6 +21,10 @@ import static com.bwee.springboot.gae.auth.exception.AuthorizationException.Erro
 @ResponseStatus(code = HttpStatus.FORBIDDEN)
 public class AuthorizationException extends RuntimeException {
 
+  public static AuthorizationException algorithmMismatch(final String token) {
+    return new AuthorizationException(MISSING_TOKEN, "Token: " + token);
+  }
+
   public static AuthorizationException missingToken() {
     return new AuthorizationException(MISSING_TOKEN);
   }
@@ -49,6 +53,7 @@ public class AuthorizationException extends RuntimeException {
   }
 
   public enum ErrorType {
+    ALGORITHM_MISMATCH("Algorithm does not match."),
     INVALID_TOKEN("Invalid access token."),
     INVALID_SIGNATURE("Invalid signature."),
     INSUFFICIENT_ROLES("You have insufficient roles."),

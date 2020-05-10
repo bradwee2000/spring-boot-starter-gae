@@ -97,7 +97,7 @@ public class AuthFilter implements Filter {
         if (!StringUtils.isEmpty(request.getHeader(TASK_NAME_HEADER))) {
             final String taskName = request.getHeader(TASK_NAME_HEADER);
             final AuthUser authUser = userFactory.createUser(taskName, "system", serviceRole);
-            userContext.setAuthUser(authUser);
+            userContext.setAuthUser(authUser).setTokenStatus(TokenStatus.success);
             return true;
         }
         return false;
@@ -113,8 +113,11 @@ public class AuthFilter implements Filter {
         } else {
             try {
                 final AuthUser user = tokenVerifier.verifyToken(token);
+
                 userContext.setAuthUser(user).setTokenStatus(TokenStatus.success);
             } catch (final AuthorizationException e) {
+                userContext.setTokenStatus(TokenStatus.invalid); // default
+
                 // Do not throw errors yet. Not all URLs need security.
                 switch (e.getErrorType()) {
                     case EXPIRED_TOKEN: userContext.setTokenStatus(TokenStatus.expired); break;

@@ -61,6 +61,10 @@ public class AuthHandler {
      * Verify that request header contains valid Auth Token.
      */
     private void verifyAuthToken(final JoinPoint joinPoint) {
+        if (userContext.getTokenStatus() == null) {
+            throw AuthorizationException.missingToken();
+        }
+
         switch (userContext.getTokenStatus()) {
             case missing:
                 throw AuthorizationException.missingToken();
@@ -71,6 +75,7 @@ public class AuthHandler {
         }
 
         final AuthUser user = userContext.getAuthUser();
+
         if (user.getRoles().contains(adminRole) || user.getRoles().contains(serviceRole)) {
             return;
         }
